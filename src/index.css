@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 像素风格字体 */
+@font-face {
+  font-family: 'PixelFont';
+  src: local('Courier New');
+}
+
+body {
+  font-family: 'PixelFont', 'Courier New', monospace;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 像素风格按钮 */
+.pixel-button {
+  @apply px-4 py-2 border-2 border-white bg-gray-800 text-white font-mono;
+  box-shadow: 4px 4px 0px rgba(255, 255, 255, 0.3);
+  transition: all 0.1s ease;
+}
+
+.pixel-button:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px rgba(255, 255, 255, 0.3);
+}
+
+.pixel-button:active {
+  transform: translate(4px, 4px);
+  box-shadow: 0px 0px 0px rgba(255, 255, 255, 0.3);
+}
+
+/* 游戏画布样式 */
+.game-canvas {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #4a5568;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #718096;
+}
