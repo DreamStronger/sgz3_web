@@ -6,12 +6,39 @@
   src: local('Courier New');
 }
 
-body {
-  font-family: 'PixelFont', 'Courier New', monospace;
+/* 允许滚动 */
+html, body {
+  height: 100%;
   margin: 0;
   padding: 0;
+}
+
+/* 美化滚动条 */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1a1a;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #8B7355 0%, #6B5344 100%);
+  border-radius: 5px;
+  border: 1px solid #4a3728;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #A08060 0%, #8B7355 100%);
+}
+
+body {
+  font-family: 'PixelFont', 'Courier New', monospace;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
 }
 
 /* 像素风格按钮 */
@@ -37,21 +64,27 @@ body {
   image-rendering: crisp-edges;
 }
 
-/* 滚动条样式 */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+/* 历史厚重感样式 */
+.historical-text {
+  font-family: '"STKaiti", "KaiTi", "SimSun", serif';
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
-::-webkit-scrollbar-track {
-  background: #1a1a1a;
+/* 古典边框效果 */
+.classical-border {
+  border: 2px solid rgba(218, 165, 32, 0.4);
+  box-shadow: 0 0 20px rgba(218, 165, 32, 0.1), inset 0 0 20px rgba(0, 0, 0, 0.3);
 }
 
-::-webkit-scrollbar-thumb {
-  background: #4a5568;
-  border-radius: 4px;
+/* 隐藏滚动条 */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #718096;
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
+
+
+

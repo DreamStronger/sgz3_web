@@ -1,0 +1,600 @@
+[
+  {
+    "id": "zhangjiao",
+    "name": "张角",
+    "faction": "yellow_turban",
+    "attributes": {
+      "command": 75,
+      "force": 60,
+      "intelligence": 90,
+      "politics": 70,
+      "charm": 85
+    },
+    "skills": ["太平道", "妖术"],
+    "loyalty": 100,
+    "location": "luoyang",
+    "items": [],
+    "status": "active",
+    "personality": "brave",
+    "history": {
+      "formerLords": [],
+      "battles": 0,
+      "victories": 0
+    }
+  },
+  {
+    "id": "zhangbao",
+    "name": "张宝",
+    "faction": "yellow_turban",
+    "attributes": {
+      "command": 70,
+      "force": 65,
+      "intelligence": 75,
+      "politics": 60,
+      "charm": 70
+    },
+    "skills": ["妖术"],
+    "loyalty": 100,
+    "location": "luoyang",
+    "items": [],
+    "status": "active",
+    "personality": "normal",
+    "history": {
+      "formerLords": [],
+      "battles": 0,
+      "victories": 0
+    }
+  },
+  {
+    "id": "zhangliang",
+    "name": "张梁",
+    "faction": "yellow_turban",
+    "attributes": {
+      "command": 72,
+      "force": 70,
+      "intelligence": 65,
+      "politics": 55,
+      "charm": 65
+    },
+    "skills": ["突击"],
+    "loyalty": 100,
+    "location": "luoyang",
+    "items": [],
+    "status": "active",
+    "personality": "rash",
+    "history": {
+      "formerLords": [],
+      "battles": 0,
+      "victories": 0
+    }
+  },
+  {
+    "id": "bocai",
+    "name": "波才",
+    "faction": "yellow_turban",
+    "attributes": {
+      "command": 65,
+      "force": 68,
+      "intelligence": 55,
+      "politics": 45,
+      "charm": 50
+    },
+    "skills": [],
+    "loyalty": 85,
+    "location": "xuchang",
+    "items": [],
+    "status": "active",
+    "personality": "normal",
+    "history": {
+      "formerLords": [],
+      "battles": 0,
+      "victories": 0
+    }
+  },
+  {
+    "id": "chengyuanzhi",
+    "name": "程远志",
+    "faction": "yellow_turban",
+    "attributes": {
+      "command": 60,
+      "force": 72,
+      "intelligence": 45,
+      "politics": 35,
+      "charm": 40
+    },
+    "skills": [],
+    "loyalty": 80,
+    "location": "ye",
+    "items": [],
+    "status": "active",
+    "personality": "rash",
+    "history": {
+      "formerLords": [],
+      "battles": 0,
+      "victories": 0
+    }
+  },
+  {
+    "id": "dengmao",
+    "name": "邓茂",
+    "faction": "yellow_turban",
+    "attributes": {
+      "command": 55,
+      "force": 65,
+      "intelligence": 40,
+      "politics": 30,
+      "charm": 35
+    },
+    "skills": [],
+    "loyalty": 75,
+    "location": "ye",
+    "items": [],
+    "status": "active",
+    "personality": "normal",
+    "history": {
+      "formerLords": [],
+      "battles": 0,
+      "victories": 0
+    }
+  },
+  {
+    "id": "gaosheng",
+    "name": "高升",
+    "faction": "yellow_turban",
+    "attributes": {
+      "command": 58,
+      "force": 62,
+      "intelligence": 50,
+      "politics": 40,
+      "charm": 45
+    },
+    "skills": [],
+    "loyalty": 70,
+    "location": "changan",
+    "items": [],
+    "status": "active",
+    "personality": "normal",
+    "history": {
+      "formerLords": [],
+      "battles": 0,
+      "victories": 0
+    }
+  },
+  {
+    "id": "yanzheng",
+    "name": "严政",
+    "faction": "yellow_turban",
+    "attributes": {
+      "command": 52,
+      "force": 58,
+      "intelligence": 45,
+      "politics": 38,
+      "charm": 42
+    },
+    "skills": [],
+    "loyalty": 65,
+    "location": "changan",
+    "items": [],
+    "status": "active",
+    "personality": "timid",
+    "history": {
+      "formerLords": [],
+      "battles": 0,
+      "victories": 0
+    }
+  },
+  {
+    "id": "hejin",
+    "name": "何进",
+    "faction": "han",
+    "attributes": {
+      "command": 70,
+      "force": 65,
+      "intelligence": 55,
+      "politics": 75,
+      "charm": 70
+    },
+    "skills": [],
+    "loyalty": 100,
+    "location": "luoyang",
+    "items": [],
+    "status": "active",
+    "personality": "normal",
+    "history": {
+      "formerLords": [],
+      "battles": 0,
+      "victories": 0
+    }
+  },
+  {
+    "id": "luzhi",
+    "name": "卢植",
+    "faction": "han",
+    "attributes": {
+      "command": 80,
+      "force": 70,
+      "intelligence": 85,
+      "politics": 90,
+      "charm": 85
+    },
+    "skills": ["儒将"],
+    "loyalty": 100,
+    "location": "luoyang",
+    "items": [],
+    "status": "active",
+    "personality": "calm",
+    "history": {
+      "formerLords": [],
+      "battles": 0,
+      "victories": 0
+    }
+  },
+  {
+    "id": "huangfusong",
+    "name": "皇甫嵩",
+    "faction": "han",
+    "attributes": {
+      "command": 88,
+      "force": 75,
+      "intelligence": 80,
+      "politics": 75,
+      "charm": 80
+    },
+    "skills": ["名将"],
+    "loyalty": 100,
+    "location": "changan",
+    "items": [],
+    "status": "active",
+    "personality": "calm",
+    "history": {
+      "formerLords": [],
+      "battles": 0,
+      "victories": 0
+    }
+  },
+  {
+    "id": "zhujun",
+    "name": "朱儁",
+    "faction": "han",
+    "attributes": {
+      "command": 85,
+      "force": 72,
+      "intelligence": 78,
+      "politics": 72,
+      "charm": 75
+    },
+    "skills": ["名将"],
+    "loyalty": 100,
+    "location": "xuchang",
+    "items": [],
+    "status": "active",
+    "personality": "normal",
+    "history": {
+      "formerLords": [],
+      "battles": 0,
+      "victories": 0
+    }
+  },
+  {
+    "id": "caocao",
+    "name": "曹操",
+    "faction": "han",
+    "attributes": {
+      "command": 95,
+      "force": 72,
+      "intelligence": 96,
+      "politics": 95,
+      "charm": 96
+    },
+    "skills": ["奸雄", "神算"],
+    "loyalty": 100,
+    "location": "luoyang",
+    "items": [],
+    "status": "active",
+    "personality": "calm",
+    "history": {
+      "formerLords": [],
+      "battles": 0,
+      "victories": 0
+    }
+  },
+  {
+    "id": "liubei",
+    "name": "刘备",
+    "faction": "han",
+    "attributes": {
+      "command": 75,
+      "force": 70,
+      "intelligence": 75,
+      "politics": 80,
+      "charm": 99
+    },
+    "skills": ["仁德"],
+    "loyalty": 100,
+    "location": "xiangyang",
+    "items": [],
+    "status": "active",
+    "personality": "righteous",
+    "history": {
+      "formerLords": [],
+      "battles": 0,
+      "victories": 0
+    }
+  },
+  {
+    "id": "guanyu",
+    "name": "关羽",
+    "faction": "han",
+    "attributes": {
+      "command": 95,
+      "force": 98,
+      "intelligence": 80,
+      "politics": 70,
+      "charm": 95
+    },
+    "skills": ["武圣"],
+    "loyalty": 100,
+    "location": "xiangyang",
+    "items": [],
+    "status": "active",
+    "personality": "brave",
+    "history": {
+      "formerLords": [],
+      "battles": 0,
+      "victories": 0
+    }
+  },
+  {
+    "id": "zhangfei",
+    "name": "张飞",
+    "faction": "han",
+    "attributes": {
+      "command": 88,
+      "force": 99,
+      "intelligence": 45,
+      "politics": 35,
+      "charm": 60
+    },
+    "skills": ["猛将"],
+    "loyalty": 100,
+    "location": "xiangyang",
+    "items": [],
+    "status": "active",
+    "personality": "rash",
+    "history": {
+      "formerLords": [],
+      "battles": 0,
+      "victories": 0
+    }
+  },
+  {
+    "id": "sunjian",
+    "name": "孙坚",
+    "faction": "han",
+    "attributes": {
+      "command": 90,
+      "force": 92,
+      "intelligence": 75,
+      "politics": 70,
+      "charm": 85
+    },
+    "skills": ["猛虎"],
+    "loyalty": 100,
+    "location": "jianye",
+    "items": [],
+    "status": "active",
+    "personality": "brave",
+    "history": {
+      "formerLords": [],
+      "battles": 0,
+      "victories": 0
+    }
+  },
+  {
+    "id": "sunce",
+    "name": "孙策",
+    "faction": "han",
+    "attributes": {
+      "command": 92,
+      "force": 96,
+      "intelligence": 72,
+      "politics": 68,
+      "charm": 90
+    },
+    "skills": ["小霸王"],
+    "loyalty": 100,
+    "location": "jianye",
+    "items": [],
+    "status": "active",
+    "personality": "brave",
+    "history": {
+      "formerLords": [],
+      "battles": 0,
+      "victories": 0
+    }
+  },
+  {
+    "id": "zhouyu",
+    "name": "周瑜",
+    "faction": "han",
+    "attributes": {
+      "command": 96,
+      "force": 75,
+      "intelligence": 97,
+      "politics": 85,
+      "charm": 95
+    },
+    "skills": ["火攻"],
+    "loyalty": 100,
+    "location": "jianye",
+    "items": [],
+    "status": "active",
+    "personality": "calm",
+    "history": {
+      "formerLords": [],
+      "battles": 0,
+      "victories": 0
+    }
+  },
+  {
+    "id": "dongzhuo",
+    "name": "董卓",
+    "faction": "dong",
+    "attributes": {
+      "command": 80,
+      "force": 88,
+      "intelligence": 65,
+      "politics": 60,
+      "charm": 45
+    },
+    "skills": ["暴虐"],
+    "loyalty": 100,
+    "location": "changan",
+    "items": [],
+    "status": "active",
+    "personality": "rash",
+    "history": {
+      "formerLords": [],
+      "battles": 0,
+      "victories": 0
+    }
+  },
+  {
+    "id": "lvbu",
+    "name": "吕布",
+    "faction": "dong",
+    "attributes": {
+      "command": 88,
+      "force": 100,
+      "intelligence": 35,
+      "politics": 25,
+      "charm": 45
+    },
+    "skills": ["勇将"],
+    "loyalty": 50,
+    "location": "changan",
+    "items": [],
+    "status": "active",
+    "personality": "rash",
+    "history": {
+      "formerLords": ["dingyuan"],
+      "battles": 0,
+      "victories": 0
+    }
+  },
+  {
+    "id": "huaxiong",
+    "name": "华雄",
+    "faction": "dong",
+    "attributes": {
+      "command": 75,
+      "force": 90,
+      "intelligence": 50,
+      "politics": 40,
+      "charm": 55
+    },
+    "skills": [],
+    "loyalty": 85,
+    "location": "changan",
+    "items": [],
+    "status": "active",
+    "personality": "brave",
+    "history": {
+      "formerLords": [],
+      "battles": 0,
+      "victories": 0
+    }
+  },
+  {
+    "id": "liubiao",
+    "name": "刘表",
+    "faction": "liu_biao",
+    "attributes": {
+      "command": 60,
+      "force": 45,
+      "intelligence": 75,
+      "politics": 85,
+      "charm": 80
+    },
+    "skills": [],
+    "loyalty": 100,
+    "location": "xiangyang",
+    "items": [],
+    "status": "active",
+    "personality": "calm",
+    "history": {
+      "formerLords": [],
+      "battles": 0,
+      "victories": 0
+    }
+  },
+  {
+    "id": "yuan shao",
+    "name": "袁绍",
+    "faction": "yuan_shao",
+    "attributes": {
+      "command": 80,
+      "force": 70,
+      "intelligence": 70,
+      "politics": 75,
+      "charm": 85
+    },
+    "skills": [],
+    "loyalty": 100,
+    "location": "ye",
+    "items": [],
+    "status": "active",
+    "personality": "normal",
+    "history": {
+      "formerLords": [],
+      "battles": 0,
+      "victories": 0
+    }
+  },
+  {
+    "id": "wenchou",
+    "name": "文丑",
+    "faction": "yuan_shao",
+    "attributes": {
+      "command": 75,
+      "force": 92,
+      "intelligence": 45,
+      "politics": 35,
+      "charm": 50
+    },
+    "skills": [],
+    "loyalty": 90,
+    "location": "ye",
+    "items": [],
+    "status": "active",
+    "personality": "brave",
+    "history": {
+      "formerLords": [],
+      "battles": 0,
+      "victories": 0
+    }
+  },
+  {
+    "id": "yanliang",
+    "name": "颜良",
+    "faction": "yuan_shao",
+    "attributes": {
+      "command": 78,
+      "force": 94,
+      "intelligence": 40,
+      "politics": 30,
+      "charm": 48
+    },
+    "skills": [],
+    "loyalty": 90,
+    "location": "ye",
+    "items": [],
+    "status": "active",
+    "personality": "brave",
+    "history": {
+      "formerLords": [],
+      "battles": 0,
+      "victories": 0
+    }
+  }
+]

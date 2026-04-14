@@ -28,6 +28,7 @@ export interface City {
   id: string;
   name: string;
   faction: string;          // 所属势力
+  state: string;            // 所属州
   position: { x: number; y: number };
   terrain: 'plain' | 'mountain' | 'water' | 'pass';
   stats: {

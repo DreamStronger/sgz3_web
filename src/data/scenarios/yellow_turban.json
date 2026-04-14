@@ -1,0 +1,21 @@
+{
+  "id": "yellow_turban",
+  "name": "黄巾之乱",
+  "year": 184,
+  "description": "东汉末年，张角创立太平道，发动黄巾起义。天下大乱，群雄并起。",
+  "playerFactions": ["han", "yellow_turban", "dong", "yuan_shao", "liu_biao", "chengdu", "wu"],
+  "difficulty": {
+    "easy": {
+      "playerResources": 1.5,
+      "aiIntelligence": 0.7
+    },
+    "normal": {
+      "playerResources": 1.0,
+      "aiIntelligence": 1.0
+    },
+    "hard": {
+      "playerResources": 0.8,
+      "aiIntelligence": 1.3
+    }
+  }
+}

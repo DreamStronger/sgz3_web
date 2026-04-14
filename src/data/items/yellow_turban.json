@@ -1,0 +1,137 @@
+[
+  {
+    "id": "qinglong_yanyuedao",
+    "name": "青龙偃月刀",
+    "type": "weapon",
+    "effects": {
+      "force": 10
+    },
+    "location": "xiangyang",
+    "owner": "guanyu",
+    "description": "关羽使用的兵器，重八十二斤，刀身如青龙盘旋"
+  },
+  {
+    "id": "zhangba_sheji",
+    "name": "丈八蛇矛",
+    "type": "weapon",
+    "effects": {
+      "force": 9
+    },
+    "location": "xiangyang",
+    "owner": "zhangfei",
+    "description": "张飞使用的兵器，矛长一丈八寸，矛头如蛇"
+  },
+  {
+    "id": "fangtian_huaji",
+    "name": "方天画戟",
+    "type": "weapon",
+    "effects": {
+      "force": 12
+    },
+    "location": "changan",
+    "owner": "lvbu",
+    "description": "吕布使用的兵器，戟杆画有方天画，锋利无匹"
+  },
+  {
+    "id": "sunzi_bingfa",
+    "name": "孙子兵法",
+    "type": "book",
+    "effects": {
+      "intelligence": 10
+    },
+    "location": "luoyang",
+    "description": "兵圣孙武所著，兵家必读经典"
+  },
+  {
+    "id": "taiping_yaoshu",
+    "name": "太平要术",
+    "type": "book",
+    "effects": {
+      "intelligence": 8,
+      "special": "妖术成功率+20%"
+    },
+    "location": "luoyang",
+    "owner": "zhangjiao",
+    "description": "张角所得天书，记载妖术秘法"
+  },
+  {
+    "id": "chitu_ma",
+    "name": "赤兔马",
+    "type": "horse",
+    "effects": {
+      "force": 5,
+      "special": "移动速度+50%"
+    },
+    "location": "changan",
+    "owner": "lvbu",
+    "description": "千里马，日行千里，夜走八百，吕布坐骑"
+  },
+  {
+    "id": "dilu_ma",
+    "name": "的卢马",
+    "type": "horse",
+    "effects": {
+      "force": 3,
+      "special": "逃跑成功率+30%"
+    },
+    "location": "xiangyang",
+    "description": "刘备坐骑，跃马过檀溪"
+  },
+  {
+    "id": "zhuque_yu",
+    "name": "朱雀羽扇",
+    "type": "special",
+    "effects": {
+      "intelligence": 5,
+      "command": 5,
+      "special": "计谋成功率+15%"
+    },
+    "location": "jianye",
+    "owner": "zhouyu",
+    "description": "周瑜使用的羽扇，指挥若定"
+  },
+  {
+    "id": "qixing_baojian",
+    "name": "七星宝剑",
+    "type": "weapon",
+    "effects": {
+      "force": 8,
+      "charm": 3
+    },
+    "location": "luoyang",
+    "description": "王允所有，曹操曾借以此剑行刺董卓"
+  },
+  {
+    "id": "yuxi",
+    "name": "传国玉玺",
+    "type": "special",
+    "effects": {
+      "charm": 15,
+      "special": "登基称帝必备"
+    },
+    "location": "luoyang",
+    "description": "秦始皇所制传国玉玺，得之可称帝"
+  },
+  {
+    "id": "gujia_jian",
+    "name": "古锭刀",
+    "type": "weapon",
+    "effects": {
+      "force": 7
+    },
+    "location": "jianye",
+    "owner": "sunjian",
+    "description": "孙坚使用的宝刀"
+  },
+  {
+    "id": "tieji_gong",
+    "name": "铁脊弓",
+    "type": "weapon",
+    "effects": {
+      "force": 6,
+      "special": "弓兵攻击+20%"
+    },
+    "location": "ye",
+    "description": "强力弓箭，射程远威力大"
+  }
+]
