@@ -263,49 +263,160 @@ export function GameMap({ cities }: GameMapProps) {
     }
     ctx.closePath();
     
-    // 根据地形调整填充色
+    // 根据地形调整填充色（增强视觉效果）
     let fillColor = colors.fill;
+    let strokeColor = colors.stroke;
+    let strokeWidth = 1.5;
+    
     if (cell.terrain === 'water') {
-      fillColor = 'rgba(60, 120, 180, 0.3)';
+      // 水域：深蓝色，高饱和度
+      fillColor = 'rgba(40, 100, 160, 0.5)';
+      strokeColor = 'rgba(80, 140, 200, 0.8)';
+      strokeWidth = 2;
     } else if (cell.terrain === 'mountain') {
-      fillColor = 'rgba(120, 100, 80, 0.3)';
+      // 山地：深褐色，增加立体感
+      fillColor = 'rgba(100, 70, 50, 0.55)';
+      strokeColor = 'rgba(140, 100, 70, 0.85)';
+      strokeWidth = 2;
     } else if (cell.terrain === 'pass') {
-      fillColor = 'rgba(180, 140, 100, 0.35)';
+      // 关隘：金色/橙色，醒目突出
+      fillColor = 'rgba(180, 120, 60, 0.6)';
+      strokeColor = 'rgba(220, 160, 80, 0.9)';
+      strokeWidth = 2.5;
     }
     
     ctx.fillStyle = fillColor;
     ctx.fill();
     
-    // 绘制边框
-    ctx.strokeStyle = colors.stroke;
-    ctx.lineWidth = 1.5;
+    // 绘制地形边框（增强）
+    ctx.strokeStyle = strokeColor;
+    ctx.lineWidth = strokeWidth;
     ctx.stroke();
     
-    // 绘制地形装饰
+    // 绘制地形装饰（增强视觉效果）
     if (cell.terrain === 'mountain') {
       drawMountainDecoration(ctx, center.x, center.y);
     } else if (cell.terrain === 'water') {
       drawWaterDecoration(ctx, center.x, center.y);
+    } else if (cell.terrain === 'pass') {
+      drawPassDecoration(ctx, center.x, center.y);
     }
   };
 
-  // 绘制山地装饰
+  // 绘制山地装饰（增强）
   const drawMountainDecoration = (ctx: CanvasRenderingContext2D, x: number, y: number) => {
-    ctx.fillStyle = 'rgba(100, 80, 60, 0.3)';
+    // 主山峰（大）
+    ctx.fillStyle = 'rgba(80, 60, 40, 0.7)';
     ctx.beginPath();
-    ctx.moveTo(x - 15, y + 10);
-    ctx.lineTo(x, y - 15);
-    ctx.lineTo(x + 15, y + 10);
+    ctx.moveTo(x - 20, y + 15);
+    ctx.lineTo(x - 5, y - 20);
+    ctx.lineTo(x + 10, y + 15);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(120, 90, 60, 0.8)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    
+    // 小山峰（左）
+    ctx.fillStyle = 'rgba(90, 70, 50, 0.6)';
+    ctx.beginPath();
+    ctx.moveTo(x - 25, y + 15);
+    ctx.lineTo(x - 15, y - 10);
+    ctx.lineTo(x - 5, y + 15);
+    ctx.closePath();
+    ctx.fill();
+    
+    // 小山峰（右）
+    ctx.fillStyle = 'rgba(95, 75, 55, 0.6)';
+    ctx.beginPath();
+    ctx.moveTo(x + 5, y + 15);
+    ctx.lineTo(x + 15, y - 8);
+    ctx.lineTo(x + 25, y + 15);
+    ctx.closePath();
+    ctx.fill();
+    
+    // 山顶雪帽（装饰）
+    ctx.fillStyle = 'rgba(220, 220, 230, 0.5)';
+    ctx.beginPath();
+    ctx.moveTo(x - 8, y - 15);
+    ctx.lineTo(x - 5, y - 20);
+    ctx.lineTo(x + 3, y - 18);
+    ctx.lineTo(x + 8, y - 15);
     ctx.closePath();
     ctx.fill();
   };
 
-  // 绘制水域装饰
+  // 绘制水域装饰（增强）
   const drawWaterDecoration = (ctx: CanvasRenderingContext2D, x: number, y: number) => {
-    ctx.strokeStyle = 'rgba(100, 160, 220, 0.3)';
-    ctx.lineWidth = 1;
+    // 波纹效果（多层）
+    ctx.strokeStyle = 'rgba(100, 180, 240, 0.6)';
+    ctx.lineWidth = 2;
+    
+    // 外圈波纹
+    ctx.beginPath();
+    ctx.arc(x, y, 15, 0, Math.PI, true);
+    ctx.stroke();
+    
+    // 内圈波纹
+    ctx.strokeStyle = 'rgba(120, 200, 260, 0.5)';
+    ctx.lineWidth = 1.5;
     ctx.beginPath();
     ctx.arc(x, y, 10, 0, Math.PI, true);
+    ctx.stroke();
+    
+    // 波纹细节
+    ctx.strokeStyle = 'rgba(140, 220, 280, 0.4)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(x - 5, y - 3, 5, 0, Math.PI * 0.8, true);
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.arc(x + 5, y + 3, 5, Math.PI * 0.2, Math.PI, true);
+    ctx.stroke();
+  };
+
+  // 绘制关隘装饰（新增）
+  const drawPassDecoration = (ctx: CanvasRenderingContext2D, x: number, y: number) => {
+    // 关隘城墙
+    ctx.fillStyle = 'rgba(160, 100, 50, 0.8)';
+    ctx.fillRect(x - 15, y - 5, 30, 15);
+    
+    // 墙砖纹理
+    ctx.strokeStyle = 'rgba(200, 140, 80, 0.7)';
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 3; i++) {
+      ctx.beginPath();
+      ctx.moveTo(x - 15, y - 5 + i * 5);
+      ctx.lineTo(x + 15, y - 5 + i * 5);
+      ctx.stroke();
+    }
+    
+    // 城门
+    ctx.fillStyle = 'rgba(40, 30, 20, 0.9)';
+    ctx.fillRect(x - 5, y + 2, 10, 8);
+    
+    // 城门边框
+    ctx.strokeStyle = 'rgba(220, 180, 100, 0.8)';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(x - 5, y + 2, 10, 8);
+    
+    // 旗帜
+    ctx.fillStyle = 'rgba(220, 160, 80, 0.9)';
+    ctx.beginPath();
+    ctx.moveTo(x, y - 5);
+    ctx.lineTo(x, y - 18);
+    ctx.lineTo(x + 8, y - 12);
+    ctx.lineTo(x, y - 8);
+    ctx.closePath();
+    ctx.fill();
+    
+    // 旗杆
+    ctx.strokeStyle = 'rgba(180, 140, 80, 0.9)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(x, y - 5);
+    ctx.lineTo(x, y - 18);
     ctx.stroke();
   };
 
