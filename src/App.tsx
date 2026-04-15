@@ -3,6 +3,7 @@ import { MainMenu } from './components/UI/MainMenu';
 import { CityInfo } from './components/UI/CityInfo';
 import { GameMap } from './components/Map/GameMap';
 import { PoliticsPanel } from './components/UI/PoliticsPanel';
+import { GeneralPanel } from './components/UI/GeneralPanel';
 import { useGameStore } from './store';
 import type { City, Faction, General } from './types';
 import citiesData from './data/cities/yellow_turban.json';
@@ -14,6 +15,7 @@ function App() {
   const [showGeneralsModal, setShowGeneralsModal] = useState(false);
   const [showCitiesModal, setShowCitiesModal] = useState(false);
   const [showPoliticsPanel, setShowPoliticsPanel] = useState(false);
+  const [showGeneralPanel, setShowGeneralPanel] = useState(false);
   const { 
     turn, 
     season,
@@ -393,7 +395,9 @@ function App() {
                 <span>🤝</span>
                 <span>外交</span>
               </button>
-              <button className="bg-gradient-to-br from-purple-900/80 to-purple-800/80 hover:from-purple-800/90 hover:to-purple-700/90 px-6 py-2.5 rounded-lg text-sm font-medium transition-all shadow-lg border border-purple-600/40 flex items-center space-x-2" style={{ fontFamily: '"STKaiti", "KaiTi", serif' }}>
+              <button 
+                onClick={() => setShowGeneralPanel(true)}
+                className="bg-gradient-to-br from-purple-900/80 to-purple-800/80 hover:from-purple-800/90 hover:to-purple-700/90 px-6 py-2.5 rounded-lg text-sm font-medium transition-all shadow-lg border border-purple-600/40 flex items-center space-x-2" style={{ fontFamily: '"STKaiti", "KaiTi", serif' }}>
                 <span>👤</span>
                 <span>武将</span>
               </button>
@@ -487,6 +491,11 @@ function App() {
           {/* 内政面板 */}
           {showPoliticsPanel && (
             <PoliticsPanel onClose={() => setShowPoliticsPanel(false)} />
+          )}
+
+          {/* 武将面板 */}
+          {showGeneralPanel && (
+            <GeneralPanel onClose={() => setShowGeneralPanel(false)} />
           )}
         </div>
       )}
