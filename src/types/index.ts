@@ -122,6 +122,15 @@ export interface Unit {
   general?: string;
 }
 
+// 军队移动状态
+export interface ArmyMovement {
+  targetCity: string;        // 目标城市ID
+  progress: number;          // 移动进度 (0-100)
+  turnsRemaining: number;    // 剩余回合数
+  path: string[];            // 移动路径（城市ID数组）
+  startedTurn: number;       // 开始移动的回合
+}
+
 // 军队
 export interface Army {
   id: string;
@@ -135,6 +144,9 @@ export interface Army {
     food: number;            // 携带的粮草
     maxFood: number;         // 最大携带量
   };
+  movement?: ArmyMovement;    // 移动状态
+  morale: number;            // 军队士气 (0-100)
+  fatigue: number;           // 军队疲劳度 (0-100)
 }
 
 // 宝物数据模型

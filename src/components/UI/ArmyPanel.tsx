@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useGameStore } from '@/store';
+import { ArmyMovementPanel } from './ArmyMovementPanel';
 import type { Army, Unit, Formation } from '@/types';
 
 interface ArmyPanelProps {
@@ -25,6 +26,7 @@ export function ArmyPanel({ onClose }: ArmyPanelProps) {
   const [cavalryCount, setCavalryCount] = useState(0);
   const [archerCount, setArcherCount] = useState(0);
   const [navyCount, setNavyCount] = useState(0);
+  const [movingArmy, setMovingArmy] = useState<Army | null>(null);
 
   // 获取玩家势力的城市
   const playerCities = Object.values(cities).filter(city => city.faction === currentPlayer);
@@ -190,13 +192,28 @@ export function ArmyPanel({ onClose }: ArmyPanelProps) {
                           <span className="text-xs text-amber-200/50 ml-2">
                             {formations[army.formation]?.name}
                           </span>
+                          {army.status === 'moving' && (
+                            <span className="text-xs bg-blue-900/50 text-blue-300 px-2 py-0.5 rounded ml-2">
+                              移动中
+                            </span>
+                          )}
                         </div>
-                        <button
-                          onClick={() => handleDeleteArmy(army.id)}
-                          className="text-xs text-red-400 hover:text-red-300 px-2 py-1 rounded hover:bg-red-900/30"
-                        >
-                          解散
-                        </button>
+                        <div className="flex gap-2">
+                          {army.status === 'idle' && (
+                            <button
+                              onClick={() => setMovingArmy(army)}
+                              className="text-xs text-blue-400 hover:text-blue-300 px-2 py-1 rounded hover:bg-blue-900/30"
+                            >
+                              移动
+                            </button>
+                          )}
+                          <button
+                            onClick={() => handleDeleteArmy(army.id)}
+                            className="text-xs text-red-400 hover:text-red-300 px-2 py-1 rounded hover:bg-red-900/30"
+                          >
+                            解散
+                          </button>
+                        </div>
                       </div>
                       <div className="text-xs text-amber-200/60">
                         {army.units.map(u => `${u.type === 'infantry' ? '步兵' : u.type === 'cavalry' ? '骑兵' : u.type === 'archer' ? '弓兵' : '水军'} ${u.count}`).join(' | ')}
@@ -205,6 +222,20 @@ export function ArmyPanel({ onClose }: ArmyPanelProps) {
                         总兵力: {army.units.reduce((sum, u) => sum + u.count, 0)} | 
                         粮草: {army.supplies.food}/{army.supplies.maxFood}
                       </div>
+                      {army.status === 'moving' && army.movement && (
+                        <div className="mt-2 text-xs">
+                          <div className="flex justify-between items-center mb-1">
+                            <span className="text-blue-300">移动至: {cities[army.movement.targetCity]?.name}</span>
+                            <span className="text-blue-200">{Math.round(army.movement.progress)}%</span>
+                          </div>
+                          <div className="h-1.5 bg-stone-700 rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-blue-500 transition-all duration-300"
+                              style={{ width: `${army.movement.progress}%` }}
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -327,6 +358,14 @@ export function ArmyPanel({ onClose }: ArmyPanelProps) {
           </div>
         </div>
       </div>
+      
+      {/* 军队移动面板 */}
+      {movingArmy && (
+        <ArmyMovementPanel 
+          army={movingArmy} 
+          onClose={() => setMovingArmy(null)} 
+        />
+      )}
     </div>
   );
 }

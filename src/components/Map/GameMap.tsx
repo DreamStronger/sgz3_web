@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useMapStore, useGameStore } from '@/store';
-import type { City, Faction } from '@/types';
+import type { City, Faction, Army } from '@/types';
 
 interface GameMapProps {
   cities: City[];
@@ -15,7 +15,7 @@ export function GameMap({ cities }: GameMapProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const { viewport, setViewport, setSelectedCity, selectedCity } = useMapStore();
-  const { factions, season, weather } = useGameStore();
+  const { factions, season, weather, armies } = useGameStore();
   
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
@@ -60,7 +60,7 @@ export function GameMap({ cities }: GameMapProps) {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     renderMap(ctx);
-  }, [cities, viewport, selectedCity, hoveredCity, factions, canvasSize, season, weather]);
+  }, [cities, viewport, selectedCity, hoveredCity, factions, canvasSize, season, weather, armies]);
 
   // 地图基础尺寸
   const MAP_WIDTH = 2400;
@@ -107,6 +107,9 @@ export function GameMap({ cities }: GameMapProps) {
     
     // 绘制城市（保留交互功能）
     cities.forEach(city => drawCity(ctx, city));
+    
+    // 绘制军队
+    drawArmies(ctx);
     
     ctx.restore();
     
@@ -335,6 +338,86 @@ export function GameMap({ cities }: GameMapProps) {
       ctx.fillText(`${Math.floor(city.resources.soldiers/1000)}k`, x, y-size-8);
       ctx.shadowBlur = 0;
     }
+  };
+  
+  // 绘制军队
+  const drawArmies = (ctx: CanvasRenderingContext2D) => {
+    Object.values(armies).forEach(army => {
+      const city = cities.find(c => c.id === army.location);
+      if (!city) return;
+      
+      const faction = factions[army.faction] as Faction | undefined;
+      const x = city.position.x;
+      const y = city.position.y;
+      
+      // 计算军队偏移（避免重叠）
+      const cityArmies = Object.values(armies).filter(a => a.location === army.location);
+      const armyIndex = cityArmies.indexOf(army);
+      const offsetAngle = (armyIndex / cityArmies.length) * Math.PI * 2;
+      const offsetRadius = 35;
+      
+      const armyX = x + Math.cos(offsetAngle) * offsetRadius;
+      const armyY = y + Math.sin(offsetAngle) * offsetRadius;
+      
+      // 如果正在移动，绘制移动路径
+      if (army.status === 'moving' && army.movement) {
+        const movement = army.movement;
+        const targetCity = cities.find(c => c.id === movement.targetCity);
+        if (targetCity) {
+          // 绘制移动路径
+          ctx.beginPath();
+          ctx.moveTo(armyX, armyY);
+          
+          // 计算中间点
+          const midX = (armyX + targetCity.position.x) / 2;
+          const midY = (armyY + targetCity.position.y) / 2;
+          ctx.quadraticCurveTo(midX, midY - 20, targetCity.position.x, targetCity.position.y);
+          
+          ctx.strokeStyle = 'rgba(100, 150, 255, 0.6)';
+          ctx.lineWidth = 2;
+          ctx.setLineDash([5, 5]);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          
+          // 绘制移动进度
+          const progressX = armyX + (targetCity.position.x - armyX) * (movement.progress / 100);
+          const progressY = armyY + (targetCity.position.y - armyY) * (movement.progress / 100);
+          
+          ctx.beginPath();
+          ctx.arc(progressX, progressY, 8, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(100, 150, 255, 0.8)';
+          ctx.fill();
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        }
+      }
+      
+      // 绘制军队标记
+      ctx.beginPath();
+      ctx.arc(armyX, armyY, 12, 0, Math.PI * 2);
+      ctx.fillStyle = faction?.color || '#ff6b6b';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      
+      // 绘制军队图标（剑）
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 14px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('⚔', armyX, armyY);
+      
+      // 显示军队兵力
+      const totalSoldiers = army.units.reduce((sum, u) => sum + u.count, 0);
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+      ctx.shadowBlur = 3;
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 12px "Microsoft YaHei"';
+      ctx.fillText(`${Math.floor(totalSoldiers / 1000)}k`, armyX, armyY + 20);
+      ctx.shadowBlur = 0;
+    });
   };
 
   const drawBorder = (ctx: CanvasRenderingContext2D, width: number, height: number) => {

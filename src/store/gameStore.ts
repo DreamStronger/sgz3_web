@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { GameState, Faction, City, General, Item, Army, Weather, Title, GeneralRelation, Battle, Captive, Formation, Tactics, Stratagem } from '@/types';
+import { GameState, Faction, City, General, Item, Army, Weather, Title, GeneralRelation, Battle, Captive, Formation, Tactics, Stratagem, ArmyMovement } from '@/types';
 
 interface GameStore extends GameState {
   // 官职和关系数据
@@ -33,6 +33,9 @@ interface GameStore extends GameState {
   updateArmy: (armyId: string, updates: Partial<Army>) => void;
   createArmy: (army: Army) => void;
   deleteArmy: (armyId: string) => void;
+  moveArmy: (armyId: string, targetCityId: string) => boolean;
+  cancelArmyMovement: (armyId: string) => void;
+  processArmyMovements: () => void;
   
   // 官职操作
   setTitles: (titles: Record<string, Title>) => void;
@@ -94,7 +97,52 @@ export const useGameStore = create<GameStore>((set, get) => ({
       newSeason = seasons[(currentIndex + 1) % 4];
     }
     
-    return { turn: newTurn, season: newSeason };
+    // 处理军队移动
+    const updatedArmies = { ...state.armies };
+    Object.entries(updatedArmies).forEach(([armyId, army]) => {
+      if (army.status !== 'moving' || !army.movement) return;
+      
+      const movement = army.movement;
+      const newProgress = movement.progress + (100 / movement.turnsRemaining);
+      
+      if (newProgress >= 100) {
+        // 移动完成
+        updatedArmies[armyId] = {
+          ...army,
+          location: movement.targetCity,
+          status: 'idle',
+          movement: undefined,
+          fatigue: Math.min(100, army.fatigue + 10),
+        };
+        
+        // 更新武将位置
+        army.generals.forEach(generalId => {
+          const general = state.generals[generalId];
+          if (general) {
+            state.generals[generalId] = {
+              ...general,
+              location: movement.targetCity,
+            };
+          }
+        });
+      } else {
+        // 移动中
+        updatedArmies[armyId] = {
+          ...army,
+          movement: {
+            ...movement,
+            progress: newProgress,
+            turnsRemaining: Math.max(1, movement.turnsRemaining - 1),
+          },
+        };
+      }
+    });
+    
+    return { 
+      turn: newTurn, 
+      season: newSeason,
+      armies: updatedArmies,
+    };
   }),
   
   setSeason: (season) => set({ season }),
@@ -164,6 +212,139 @@ export const useGameStore = create<GameStore>((set, get) => ({
   deleteArmy: (armyId) => set((state) => {
     const { [armyId]: _, ...remaining } = state.armies;
     return { armies: remaining };
+  }),
+  
+  // 军队移动
+  moveArmy: (armyId, targetCityId) => {
+    const state = get();
+    const army = state.armies[armyId];
+    if (!army) return false;
+    
+    const currentCity = state.cities[army.location];
+    const targetCity = state.cities[targetCityId];
+    if (!currentCity || !targetCity) return false;
+    
+    // 检查是否相邻
+    if (!currentCity.neighbors.includes(targetCityId)) {
+      return false;
+    }
+    
+    // 检查军队状态
+    if (army.status !== 'idle') {
+      return false;
+    }
+    
+    // 计算移动时间（基础1回合，地形影响）
+    const terrainMoveCost: Record<string, number> = {
+      plain: 1,
+      mountain: 2,
+      water: 1.5,
+      pass: 2,
+    };
+    
+    const baseTurns = terrainMoveCost[targetCity.terrain] || 1;
+    const turns = Math.ceil(baseTurns);
+    
+    // 计算粮草消耗
+    const totalSoldiers = army.units.reduce((sum, u) => sum + u.count, 0);
+    const foodCost = Math.ceil(totalSoldiers * 0.1 * turns);
+    
+    if (army.supplies.food < foodCost) {
+      return false;
+    }
+    
+    // 开始移动
+    const movement: ArmyMovement = {
+      targetCity: targetCityId,
+      progress: 0,
+      turnsRemaining: turns,
+      path: [army.location, targetCityId],
+      startedTurn: state.turn,
+    };
+    
+    set((state) => ({
+      armies: {
+        ...state.armies,
+        [armyId]: {
+          ...army,
+          status: 'moving',
+          movement,
+          supplies: {
+            ...army.supplies,
+            food: army.supplies.food - foodCost,
+          },
+        },
+      },
+    }));
+    
+    return true;
+  },
+  
+  // 取消军队移动
+  cancelArmyMovement: (armyId) => set((state) => {
+    const army = state.armies[armyId];
+    if (!army || army.status !== 'moving' || !army.movement) {
+      return state;
+    }
+    
+    return {
+      armies: {
+        ...state.armies,
+        [armyId]: {
+          ...army,
+          status: 'idle',
+          movement: undefined,
+        },
+      },
+    };
+  }),
+  
+  // 处理军队移动进度
+  processArmyMovements: () => set((state) => {
+    const updatedArmies = { ...state.armies };
+    
+    Object.entries(updatedArmies).forEach(([armyId, army]) => {
+      if (army.status !== 'moving' || !army.movement) return;
+      
+      const movement = army.movement;
+      const newProgress = movement.progress + (100 / movement.turnsRemaining);
+      
+      if (newProgress >= 100) {
+        // 移动完成
+        const targetCity = state.cities[movement.targetCity];
+        
+        updatedArmies[armyId] = {
+          ...army,
+          location: movement.targetCity,
+          status: 'idle',
+          movement: undefined,
+          fatigue: Math.min(100, army.fatigue + 10), // 增加疲劳
+        };
+        
+        // 更新武将位置
+        army.generals.forEach(generalId => {
+          const general = state.generals[generalId];
+          if (general) {
+            state.generals[generalId] = {
+              ...general,
+              location: movement.targetCity,
+            };
+          }
+        });
+      } else {
+        // 移动中
+        updatedArmies[armyId] = {
+          ...army,
+          movement: {
+            ...movement,
+            progress: newProgress,
+            turnsRemaining: Math.max(1, movement.turnsRemaining - 1),
+          },
+        };
+      }
+    });
+    
+    return { armies: updatedArmies };
   }),
   
   // 官职操作
