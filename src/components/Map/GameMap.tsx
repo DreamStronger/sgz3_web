@@ -22,6 +22,7 @@ export function GameMap({ cities }: GameMapProps) {
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [hoveredCity, setHoveredCity] = useState<string | null>(null);
   const [canvasSize, setCanvasSize] = useState({ width: 900, height: 600 });
+  const [gridInitialized, setGridInitialized] = useState(false);
 
   // 地图基础尺寸
   const MAP_WIDTH = 2400;
@@ -92,6 +93,9 @@ export function GameMap({ cities }: GameMapProps) {
         terrain: firstCell.terrain
       });
     }
+    
+    // 标记网格已初始化
+    setGridInitialized(true);
   }, []);
 
   // 根据坐标确定所属州
@@ -185,12 +189,12 @@ export function GameMap({ cities }: GameMapProps) {
       renderCacheRef.current.lastViewport.y !== viewport.y ||
       renderCacheRef.current.lastViewport.zoom !== viewport.zoom;
     
-    if (viewportChanged || renderCacheRef.current.needsRedraw) {
+    if (viewportChanged || renderCacheRef.current.needsRedraw || gridInitialized) {
       renderMap(ctx);
       renderCacheRef.current.lastViewport = { ...viewport };
       renderCacheRef.current.needsRedraw = false;
     }
-  }, [cities, viewport, selectedCity, hoveredCity, factions, canvasSize, season, weather, armies]);
+  }, [cities, viewport, selectedCity, hoveredCity, factions, canvasSize, season, weather, armies, gridInitialized]);
 
   // 缩放处理
   const handleZoom = useCallback((delta: number) => {
