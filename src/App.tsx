@@ -45,7 +45,10 @@ function App() {
     setRelations,
     setFormations,
     setTactics,
-    setStratagems
+    setStratagems,
+    formations,
+    tactics,
+    stratagems
   } = useGameStore();
   
   const { startBattle } = useBattleStore();

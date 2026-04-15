@@ -258,6 +258,13 @@ export function GameMap({ cities }: GameMapProps) {
     
     console.log('州分组:', Array.from(stateGroups.keys()));
     console.log('各州数量:', Array.from(stateGroups.entries()).map(([state, cells]) => ({ state, count: cells.length })));
+    console.log('stateColors定义的州:', Object.keys(stateColors));
+    
+    // 检查是否有未定义颜色的州
+    const undefinedStates = Array.from(stateGroups.keys()).filter(state => !stateColors[state] && state !== 'unknown');
+    if (undefinedStates.length > 0) {
+      console.warn('未定义颜色的州:', undefinedStates);
+    }
     
     // 绘制每个州的六边形
     stateGroups.forEach((stateCells, state) => {
