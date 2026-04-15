@@ -8,6 +8,7 @@ import { ArmyPanel } from './components/UI/ArmyPanel';
 import { CaptivePanel } from './components/UI/CaptivePanel';
 import { SupplyTransportPanel } from './components/UI/SupplyTransportPanel';
 import { BattleSelectPanel } from './components/UI/BattleSelectPanel';
+import { DiplomacyPanel } from './components/UI/DiplomacyPanel';
 import { Dialog } from './components/UI/Dialog';
 import { BattleField } from './components/Battle/BattleField';
 import { useGameStore } from './store';
@@ -32,6 +33,7 @@ function App() {
   const [showCaptivePanel, setShowCaptivePanel] = useState(false);
   const [showSupplyPanel, setShowSupplyPanel] = useState(false);
   const [showBattlePanel, setShowBattlePanel] = useState(false);
+  const [showDiplomacyPanel, setShowDiplomacyPanel] = useState(false);
   const [showBattle, setShowBattle] = useState(false);
   
   const { 
@@ -540,7 +542,9 @@ function App() {
                 <span>⚔️</span>
                 <span>战斗</span>
               </button>
-              <button className="bg-gradient-to-br from-green-900/80 to-green-800/80 hover:from-green-800/90 hover:to-green-700/90 px-6 py-2.5 rounded-lg text-sm font-medium transition-all shadow-lg border border-green-600/40 flex items-center space-x-2" style={{ fontFamily: '"STKaiti", "KaiTi", serif' }}>
+              <button 
+                onClick={() => setShowDiplomacyPanel(true)}
+                className="bg-gradient-to-br from-green-900/80 to-green-800/80 hover:from-green-800/90 hover:to-green-700/90 px-6 py-2.5 rounded-lg text-sm font-medium transition-all shadow-lg border border-green-600/40 flex items-center space-x-2" style={{ fontFamily: '"STKaiti", "KaiTi", serif' }}>
                 <span>🤝</span>
                 <span>外交</span>
               </button>
@@ -665,6 +669,11 @@ function App() {
           {/* 战斗选择面板 */}
           {showBattlePanel && (
             <BattleSelectPanel onClose={() => setShowBattlePanel(false)} />
+          )}
+          
+          {/* 外交面板 */}
+          {showDiplomacyPanel && (
+            <DiplomacyPanel onClose={() => setShowDiplomacyPanel(false)} />
           )}
           
           {/* 战斗界面 */}
