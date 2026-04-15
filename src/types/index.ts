@@ -119,10 +119,14 @@ export interface Item {
   description: string;
 }
 
+// 天气类型
+export type Weather = 'sunny' | 'cloudy' | 'rain' | 'snow';
+
 // 游戏状态
 export interface GameState {
   turn: number;              // 当前回合
   season: 'spring' | 'summer' | 'autumn' | 'winter';
+  weather: Weather;          // 当前天气
   scenario: string;         // 剧本ID
   factions: Record<string, Faction>;
   cities: Record<string, City>;

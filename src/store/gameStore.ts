@@ -1,10 +1,12 @@
 import { create } from 'zustand';
-import { GameState, Faction, City, General, Item, Army } from '@/types';
+import { GameState, Faction, City, General, Item, Army, Weather } from '@/types';
 
 interface GameStore extends GameState {
   // 游戏流程
   nextTurn: () => void;
   setSeason: (season: GameState['season']) => void;
+  setWeather: (weather: Weather) => void;
+  randomWeather: () => void;
   
   // 势力操作
   updateFaction: (factionId: string, updates: Partial<Faction>) => void;
@@ -29,6 +31,7 @@ interface GameStore extends GameState {
 const initialGameState: GameState = {
   turn: 1,
   season: 'spring',
+  weather: 'sunny',
   scenario: 'yellow_turban',
   factions: {},
   cities: {},
@@ -57,6 +60,21 @@ export const useGameStore = create<GameStore>((set) => ({
   }),
   
   setSeason: (season) => set({ season }),
+  
+  setWeather: (weather) => set({ weather }),
+  
+  // 随机天气（根据季节调整概率）
+  randomWeather: () => set((state) => {
+    const seasonWeather: Record<GameState['season'], Weather[]> = {
+      spring: ['sunny', 'sunny', 'cloudy', 'cloudy', 'rain', 'rain'],
+      summer: ['sunny', 'sunny', 'sunny', 'cloudy', 'rain', 'rain'],
+      autumn: ['sunny', 'cloudy', 'cloudy', 'cloudy', 'rain', 'snow'],
+      winter: ['sunny', 'cloudy', 'cloudy', 'snow', 'snow', 'snow'],
+    };
+    const options = seasonWeather[state.season];
+    const randomIndex = Math.floor(Math.random() * options.length);
+    return { weather: options[randomIndex] };
+  }),
   
   // 势力操作
   updateFaction: (factionId, updates) => set((state) => ({

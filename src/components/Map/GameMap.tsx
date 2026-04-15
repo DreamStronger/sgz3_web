@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useMapStore, useGameStore } from '@/store';
 import type { City, Faction } from '@/types';
 
@@ -6,11 +6,16 @@ interface GameMapProps {
   cities: City[];
 }
 
+// 缩放范围限制
+const MIN_ZOOM = 0.5;
+const MAX_ZOOM = 2.0;
+const ZOOM_STEP = 0.1;
+
 export function GameMap({ cities }: GameMapProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const { viewport, setViewport, setSelectedCity, selectedCity } = useMapStore();
-  const { factions } = useGameStore();
+  const { factions, season, weather } = useGameStore();
   
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
@@ -55,13 +60,27 @@ export function GameMap({ cities }: GameMapProps) {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     renderMap(ctx);
-  }, [cities, viewport, selectedCity, hoveredCity, factions, canvasSize]);
+  }, [cities, viewport, selectedCity, hoveredCity, factions, canvasSize, season, weather]);
 
   // 地图基础尺寸
   const MAP_WIDTH = 2400;
   const MAP_HEIGHT = 1600;
   // 固定缩放比例，让可视区域比地图小，需要拖拽查看
   const BASE_SCALE = 0.6; // 基础缩放比例，控制地图显示范围
+
+  // 缩放处理
+  const handleZoom = useCallback((delta: number) => {
+    setViewport({
+      zoom: Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, viewport.zoom + delta))
+    });
+  }, [viewport.zoom, setViewport]);
+
+  // 滚轮缩放
+  const handleWheel = useCallback((e: React.WheelEvent) => {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? -ZOOM_STEP : ZOOM_STEP;
+    handleZoom(delta);
+  }, [handleZoom]);
 
   const renderMap = (ctx: CanvasRenderingContext2D) => {
     const { width, height } = canvasSize;
@@ -333,10 +352,10 @@ export function GameMap({ cities }: GameMapProps) {
   const drawTitle = (ctx: CanvasRenderingContext2D) => {
     // 标题背景
     ctx.fillStyle = 'rgba(13, 18, 25, 0.85)';
-    ctx.fillRect(15, 15, 140, 50);
+    ctx.fillRect(15, 15, 140, 70);
     ctx.strokeStyle = 'rgba(200, 180, 140, 0.5)';
     ctx.lineWidth = 1;
-    ctx.strokeRect(15, 15, 140, 50);
+    ctx.strokeRect(15, 15, 140, 70);
     
     // 主标题
     ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
@@ -347,10 +366,29 @@ export function GameMap({ cities }: GameMapProps) {
     ctx.textBaseline = 'top';
     ctx.fillText('三国疆域图', 25, 22);
     
-    // 副标题
+    // 季节
+    const seasonNames: Record<string, string> = {
+      spring: '春',
+      summer: '夏',
+      autumn: '秋',
+      winter: '冬'
+    };
     ctx.font = '12px "SimSun", serif';
     ctx.fillStyle = 'rgba(200, 180, 140, 0.8)';
-    ctx.fillText('建安元年', 25, 44);
+    ctx.fillText(`建安元年 · ${seasonNames[season]}`, 25, 44);
+    
+    // 天气图标和文字
+    const weatherIcons: Record<string, { icon: string; color: string }> = {
+      sunny: { icon: '☀', color: '#ffd700' },
+      cloudy: { icon: '☁', color: '#a0a0a0' },
+      rain: { icon: '🌧', color: '#6090c0' },
+      snow: { icon: '❄', color: '#e0e0ff' }
+    };
+    const weatherInfo = weatherIcons[weather] || weatherIcons.sunny;
+    ctx.font = '14px "SimSun", serif';
+    ctx.fillStyle = weatherInfo.color;
+    ctx.fillText(`${weatherInfo.icon} ${weather === 'sunny' ? '晴' : weather === 'cloudy' ? '阴' : weather === 'rain' ? '雨' : '雪'}`, 25, 62);
+    
     ctx.shadowBlur = 0;
   };
 
@@ -443,17 +481,44 @@ export function GameMap({ cities }: GameMapProps) {
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
         onClick={handleClick}
+        onWheel={handleWheel}
       />
-      {/* 居中按钮 */}
-      <button
-        onClick={handleCenter}
-        className="absolute top-20 right-4 w-10 h-10 flex items-center justify-center bg-[rgba(13,18,25,0.85)] border border-[rgba(200,180,140,0.5)] rounded-lg hover:bg-[rgba(30,40,60,0.9)] transition-colors"
-        title="居中地图"
-      >
-        <svg className="w-5 h-5 text-[rgba(200,180,140,0.9)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-        </svg>
-      </button>
+      {/* 缩放控制按钮 */}
+      <div className="absolute top-20 right-4 flex flex-col gap-2">
+        <button
+          onClick={() => handleZoom(ZOOM_STEP)}
+          disabled={viewport.zoom >= MAX_ZOOM}
+          className="w-10 h-10 flex items-center justify-center bg-[rgba(13,18,25,0.85)] border border-[rgba(200,180,140,0.5)] rounded-lg hover:bg-[rgba(30,40,60,0.9)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          title="放大"
+        >
+          <svg className="w-5 h-5 text-[rgba(200,180,140,0.9)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v12m6-6H6" />
+          </svg>
+        </button>
+        <button
+          onClick={() => handleZoom(-ZOOM_STEP)}
+          disabled={viewport.zoom <= MIN_ZOOM}
+          className="w-10 h-10 flex items-center justify-center bg-[rgba(13,18,25,0.85)] border border-[rgba(200,180,140,0.5)] rounded-lg hover:bg-[rgba(30,40,60,0.9)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          title="缩小"
+        >
+          <svg className="w-5 h-5 text-[rgba(200,180,140,0.9)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 12H6" />
+          </svg>
+        </button>
+        <button
+          onClick={handleCenter}
+          className="w-10 h-10 flex items-center justify-center bg-[rgba(13,18,25,0.85)] border border-[rgba(200,180,140,0.5)] rounded-lg hover:bg-[rgba(30,40,60,0.9)] transition-colors"
+          title="居中地图"
+        >
+          <svg className="w-5 h-5 text-[rgba(200,180,140,0.9)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+          </svg>
+        </button>
+      </div>
+      {/* 缩放比例显示 */}
+      <div className="absolute bottom-4 right-4 px-3 py-1 bg-[rgba(13,18,25,0.85)] border border-[rgba(200,180,140,0.5)] rounded text-[rgba(200,180,140,0.9)] text-sm">
+        {Math.round(viewport.zoom * 100)}%
+      </div>
     </div>
   );
 }
