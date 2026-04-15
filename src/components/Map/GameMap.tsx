@@ -390,74 +390,116 @@ export function GameMap({ cities }: GameMapProps) {
     const isSelected = selectedCity === city.id;
     const isHovered = hoveredCity === city.id;
     const faction = factions[city.faction] as Faction | undefined;
-    const size = isSelected ? 20 : (isHovered ? 18 : 16);
+    const size = isSelected ? 14 : (isHovered ? 12 : 10);
     
     // 选中或悬停时的光晕效果
     if (isSelected || isHovered) {
       const gc = faction?.color || '#ffd700';
-      const gradient = ctx.createRadialGradient(x, y, 0, x, y, size+25);
-      gradient.addColorStop(0, gc+'50');
+      const gradient = ctx.createRadialGradient(x, y, 0, x, y, size+20);
+      gradient.addColorStop(0, gc+'40');
       gradient.addColorStop(1, 'transparent');
       ctx.fillStyle = gradient;
       ctx.beginPath();
-      ctx.arc(x, y, size+25, 0, Math.PI*2);
+      ctx.arc(x, y, size+20, 0, Math.PI*2);
       ctx.fill();
     }
     
-    // 外圈（势力色）
+    // 绘制城墙（五边形城堡样式）
+    ctx.save();
+    ctx.translate(x, y);
+    
+    // 城墙主体
     ctx.beginPath();
-    ctx.arc(x, y, size, 0, Math.PI*2);
+    ctx.moveTo(0, -size); // 顶部
+    ctx.lineTo(size, -size * 0.4); // 右上
+    ctx.lineTo(size * 0.8, size); // 右下
+    ctx.lineTo(-size * 0.8, size); // 左下
+    ctx.lineTo(-size, -size * 0.4); // 左上
+    ctx.closePath();
+    
+    // 填充势力色
     ctx.fillStyle = faction?.color || '#c9a227';
     ctx.fill();
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
-    ctx.lineWidth = 2;
+    
+    // 城墙边框
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+    ctx.lineWidth = 1.5;
     ctx.stroke();
     
-    // 中圈（深色）
-    ctx.beginPath();
-    ctx.arc(x, y, size-4, 0, Math.PI*2);
+    // 城墙纹理（砖块效果）
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+    ctx.lineWidth = 0.5;
+    // 横线
+    for (let i = -size + size * 0.3; i < size; i += size * 0.35) {
+      ctx.beginPath();
+      ctx.moveTo(-size + size * 0.2, i);
+      ctx.lineTo(size - size * 0.2, i);
+      ctx.stroke();
+    }
+    
+    // 城门（底部中央）
     ctx.fillStyle = '#1a2332';
-    ctx.fill();
+    ctx.fillRect(-size * 0.25, size * 0.5, size * 0.5, size * 0.5);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(-size * 0.25, size * 0.5, size * 0.5, size * 0.5);
     
-    // 内圈（势力色）
-    ctx.beginPath();
-    ctx.arc(x, y, size-7, 0, Math.PI*2);
+    // 塔楼（左右两侧）
+    const towerSize = size * 0.3;
+    // 左塔
+    ctx.fillStyle = faction?.color || '#c9a227';
+    ctx.fillRect(-size - towerSize * 0.5, -size * 0.4, towerSize, size * 0.8);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+    ctx.strokeRect(-size - towerSize * 0.5, -size * 0.4, towerSize, size * 0.8);
+    
+    // 右塔
+    ctx.fillRect(size - towerSize * 0.5, -size * 0.4, towerSize, size * 0.8);
+    ctx.strokeRect(size - towerSize * 0.5, -size * 0.4, towerSize, size * 0.8);
+    
+    // 旗帜（顶部）
     ctx.fillStyle = faction?.color || '#ffd700';
-    ctx.fill();
-    
-    // 中心点（白色）
     ctx.beginPath();
-    ctx.arc(x, y, 4, 0, Math.PI*2);
-    ctx.fillStyle = '#ffffff';
+    ctx.moveTo(0, -size);
+    ctx.lineTo(0, -size - size * 0.8);
+    ctx.lineTo(size * 0.4, -size - size * 0.5);
+    ctx.lineTo(0, -size - size * 0.2);
+    ctx.closePath();
     ctx.fill();
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
+    
+    ctx.restore();
     
     // 选中时的金色边框
     if (isSelected) {
       ctx.beginPath();
-      ctx.arc(x, y, size+5, 0, Math.PI*2);
+      ctx.arc(x, y, size + 8, 0, Math.PI * 2);
       ctx.strokeStyle = '#ffd700';
-      ctx.lineWidth = 3;
+      ctx.lineWidth = 2;
+      ctx.setLineDash([3, 3]);
       ctx.stroke();
+      ctx.setLineDash([]);
     }
     
     // 城市名称
     ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
-    ctx.shadowBlur = 6;
+    ctx.shadowBlur = 4;
     ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-    ctx.font = isSelected ? 'bold 24px "SimSun", serif' : '22px "SimSun", serif';
+    ctx.font = isSelected ? 'bold 18px "SimSun", serif' : '16px "SimSun", serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
-    ctx.fillText(city.name, x, y+size+10);
+    ctx.fillText(city.name, x, y + size + 12);
     ctx.shadowBlur = 0;
     
     // 士兵数量
     if (city.resources.soldiers > 0) {
       ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
-      ctx.shadowBlur = 4;
+      ctx.shadowBlur = 3;
       ctx.fillStyle = '#ffd700';
-      ctx.font = 'bold 16px "Microsoft YaHei"';
+      ctx.font = 'bold 12px "Microsoft YaHei"';
       ctx.textBaseline = 'bottom';
-      ctx.fillText(`${Math.floor(city.resources.soldiers/1000)}k`, x, y-size-8);
+      ctx.fillText(`${Math.floor(city.resources.soldiers/1000)}k`, x, y - size - 8);
       ctx.shadowBlur = 0;
     }
   };
@@ -601,6 +643,15 @@ export function GameMap({ cities }: GameMapProps) {
     setDragStart({ x: e.clientX, y: e.clientY });
   };
 
+  // 获取城市的对齐位置（六边形网格中心）
+  const getCityAlignedPosition = (city: City): { x: number; y: number } => {
+    if (!hexGridRef.current) {
+      return { x: city.position.x, y: city.position.y };
+    }
+    const hexCoord = hexGridRef.current.pixelToHex(city.position.x, city.position.y);
+    return hexGridRef.current.hexToPixel(hexCoord.q, hexCoord.r);
+  };
+
   const handleMouseMove = (e: React.MouseEvent) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -612,10 +663,11 @@ export function GameMap({ cities }: GameMapProps) {
     const mouseX = (e.clientX - rect.left - canvasSize.width / 2) / scale - viewport.x + MAP_WIDTH / 2;
     const mouseY = (e.clientY - rect.top - canvasSize.height / 2) / scale - viewport.y + MAP_HEIGHT / 2;
     
-    // 检测悬停的城市
+    // 检测悬停的城市（使用对齐后的位置）
     const hovered = cities.find(city => {
-      const dx = city.position.x - mouseX;
-      const dy = city.position.y - mouseY;
+      const alignedPos = getCityAlignedPosition(city);
+      const dx = alignedPos.x - mouseX;
+      const dy = alignedPos.y - mouseY;
       return Math.sqrt(dx*dx + dy*dy) < 50;
     });
     setHoveredCity(hovered?.id || null);
@@ -656,10 +708,11 @@ export function GameMap({ cities }: GameMapProps) {
     const clickX = (e.clientX - rect.left - canvasSize.width / 2) / scale - viewport.x + MAP_WIDTH / 2;
     const clickY = (e.clientY - rect.top - canvasSize.height / 2) / scale - viewport.y + MAP_HEIGHT / 2;
     
-    // 检测点击的城市
+    // 检测点击的城市（使用对齐后的位置）
     const clicked = cities.find(city => {
-      const dx = city.position.x - clickX;
-      const dy = city.position.y - clickY;
+      const alignedPos = getCityAlignedPosition(city);
+      const dx = alignedPos.x - clickX;
+      const dy = alignedPos.y - clickY;
       return Math.sqrt(dx*dx + dy*dy) < 50;
     });
     setSelectedCity(clicked?.id || null);
