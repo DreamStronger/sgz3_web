@@ -16,11 +16,47 @@ export interface General {
   items: string[];           // 装备的宝物ID
   status: 'active' | 'captured' | 'dead';
   personality: 'brave' | 'timid' | 'righteous' | 'calm' | 'rash' | 'normal'; // 性格
+  title?: string;             // 官职ID
+  merit: number;              // 功勋值
+  experience: number;         // 经验值
   history: {
     formerLords: string[];   // 前主公
     battles: number;         // 参战次数
     victories: number;       // 胜利次数
   };
+}
+
+// 官职数据模型
+export interface Title {
+  id: string;
+  name: string;
+  level: number;              // 官职等级 (1-10)
+  effects: {
+    command?: number;         // 统率加成
+    force?: number;           // 武力加成
+    intelligence?: number;    // 智力加成
+    politics?: number;        // 政治加成
+    charm?: number;           // 魅力加成
+    loyaltyBonus: number;     // 忠诚度加成
+    maxSoldiers: number;      // 带兵上限
+  };
+  requirements: {
+    minMerit: number;         // 最低功勋
+    minCommand?: number;      // 最低统率
+    minForce?: number;        // 最低武力
+    minIntelligence?: number; // 最低智力
+  };
+  cost: number;               // 封官花费
+  salary: number;             // 俸禄（每回合消耗）
+}
+
+// 武将关系数据模型
+export interface GeneralRelation {
+  general1: string;         // 武将1 ID
+  general2: string;         // 武将2 ID
+  type: 'father' | 'son' | 'brother' | 'friend' | 'enemy' | 'former_lord';
+  intimacy: number;         // 亲密值 (-100 to 100)
+  history?: string;         // 关系历史描述
 }
 
 // 城市数据模型

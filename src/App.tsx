@@ -5,10 +5,12 @@ import { GameMap } from './components/Map/GameMap';
 import { PoliticsPanel } from './components/UI/PoliticsPanel';
 import { GeneralPanel } from './components/UI/GeneralPanel';
 import { useGameStore } from './store';
-import type { City, Faction, General } from './types';
+import type { City, Faction, General, Title, GeneralRelation } from './types';
 import citiesData from './data/cities/yellow_turban.json';
 import generalsData from './data/generals/yellow_turban.json';
 import factionsData from './data/factions.json';
+import titlesData from './data/titles.json';
+import relationsData from './data/relations/yellow_turban.json';
 
 function App() {
   const [gameState, setGameState] = useState<'menu' | 'playing'>('menu');
@@ -28,7 +30,10 @@ function App() {
     nextTurn,
     randomWeather,
     updateCity,
-    updateFaction
+    updateFaction,
+    updateGeneral,
+    setTitles,
+    setRelations
   } = useGameStore();
 
   // 加载游戏数据
@@ -63,6 +68,16 @@ function App() {
         });
       });
 
+      // 加载官职数据
+      const titlesRecord: Record<string, Title> = {};
+      (titlesData as Title[]).forEach(title => {
+        titlesRecord[title.id] = title;
+      });
+      setTitles(titlesRecord);
+
+      // 加载关系数据
+      setRelations(relationsData as GeneralRelation[]);
+
       loadGame({
         turn: 1,
         season: 'spring',
@@ -75,7 +90,7 @@ function App() {
         currentPlayer: 'han'
       });
     }
-  }, [gameState, loadGame]);
+  }, [gameState, loadGame, setTitles, setRelations]);
 
   const handleStartGame = () => {
     console.log('开始游戏');
@@ -162,6 +177,41 @@ function App() {
           soldiers: totalSoldiers
         }
       });
+    });
+
+    // 忠诚度变化机制
+    Object.values(generals).forEach(general => {
+      if (!general || general.status !== 'active') return;
+      
+      let loyaltyChange = 0;
+      
+      // 长期未出战：忠诚度下降
+      loyaltyChange -= 2;
+      
+      // 性格影响
+      if (general.personality === 'righteous') {
+        // 仁义：忠诚度稳定，下降减少
+        loyaltyChange += 1;
+      } else if (general.personality === 'timid') {
+        // 胆小：忠诚度易变，下降增加
+        loyaltyChange -= 1;
+      }
+      
+      // 有官职的武将，忠诚度下降减少
+      if (general.title) {
+        loyaltyChange += 1;
+      }
+      
+      // 有宝物的武将，忠诚度下降减少
+      if (general.items.length > 0) {
+        loyaltyChange += 1;
+      }
+      
+      // 应用忠诚度变化
+      if (loyaltyChange !== 0) {
+        const newLoyalty = Math.max(0, Math.min(100, general.loyalty + loyaltyChange));
+        updateGeneral(general.id, { loyalty: newLoyalty });
+      }
     });
 
     // 推进回合

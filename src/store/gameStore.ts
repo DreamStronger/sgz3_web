@@ -1,7 +1,11 @@
 import { create } from 'zustand';
-import { GameState, Faction, City, General, Item, Army, Weather } from '@/types';
+import { GameState, Faction, City, General, Item, Army, Weather, Title, GeneralRelation } from '@/types';
 
 interface GameStore extends GameState {
+  // 官职和关系数据
+  titles: Record<string, Title>;
+  relations: GeneralRelation[];
+  
   // 游戏流程
   nextTurn: () => void;
   setSeason: (season: GameState['season']) => void;
@@ -23,6 +27,13 @@ interface GameStore extends GameState {
   // 军队操作
   updateArmy: (armyId: string, updates: Partial<Army>) => void;
   
+  // 官职操作
+  setTitles: (titles: Record<string, Title>) => void;
+  
+  // 关系操作
+  setRelations: (relations: GeneralRelation[]) => void;
+  getGeneralRelations: (generalId: string) => GeneralRelation[];
+
   // 游戏状态
   loadGame: (gameState: GameState) => void;
   resetGame: () => void;
@@ -41,8 +52,10 @@ const initialGameState: GameState = {
   currentPlayer: '',
 };
 
-export const useGameStore = create<GameStore>((set) => ({
+export const useGameStore = create<GameStore>((set, get) => ({
   ...initialGameState,
+  titles: {},
+  relations: [],
   
   // 游戏流程
   nextTurn: () => set((state) => {
@@ -116,6 +129,19 @@ export const useGameStore = create<GameStore>((set) => ({
     },
   })),
   
+  // 官职操作
+  setTitles: (titles) => set({ titles }),
+  
+  // 关系操作
+  setRelations: (relations) => set({ relations }),
+  
+  getGeneralRelations: (generalId) => {
+    const state = get();
+    return state.relations.filter(
+      r => r.general1 === generalId || r.general2 === generalId
+    );
+  },
+
   // 游戏状态
   loadGame: (gameState) => set(gameState),
   
