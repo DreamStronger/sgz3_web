@@ -390,7 +390,7 @@ export function GameMap({ cities }: GameMapProps) {
     const isSelected = selectedCity === city.id;
     const isHovered = hoveredCity === city.id;
     const faction = factions[city.faction] as Faction | undefined;
-    const size = isSelected ? 14 : (isHovered ? 12 : 10);
+    const size = isSelected ? 22 : (isHovered ? 20 : 18);
     
     // 选中或悬停时的光晕效果
     if (isSelected || isHovered) {
