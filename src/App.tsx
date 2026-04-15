@@ -5,6 +5,7 @@ import { GameMap } from './components/Map/GameMap';
 import { PoliticsPanel } from './components/UI/PoliticsPanel';
 import { GeneralPanel } from './components/UI/GeneralPanel';
 import { ArmyPanel } from './components/UI/ArmyPanel';
+import { Dialog } from './components/UI/Dialog';
 import { useGameStore } from './store';
 import type { City, Faction, General, Title, GeneralRelation, Formation, Tactics, Stratagem } from './types';
 import citiesData from './data/cities/yellow_turban.json';
@@ -587,6 +588,9 @@ function App() {
           )}
         </div>
       )}
+      
+      {/* 全局对话框 */}
+      <Dialog />
     </>
   );
 }

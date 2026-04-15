@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useGameStore, useMapStore } from '@/store';
+import { useDialogStore } from '@/store/dialogStore';
 import type { City } from '@/types';
 
 interface PoliticsPanelProps {
@@ -12,6 +13,7 @@ type FacilityType = 'market' | 'farm' | 'barracks' | 'wall';
 export function PoliticsPanel({ onClose }: PoliticsPanelProps) {
   const { cities, generals, currentPlayer, factions, updateCity, updateFaction } = useGameStore();
   const { selectedCity, setSelectedCity } = useMapStore();
+  const { showAlert } = useDialogStore();
   
   const [actionType, setActionType] = useState<ActionType>('develop');
   const [facilityType, setFacilityType] = useState<FacilityType>('market');
@@ -47,7 +49,7 @@ export function PoliticsPanel({ onClose }: PoliticsPanelProps) {
     
     const cost = actionCosts[actionType];
     if (currentCity.resources.money < cost) {
-      alert('金钱不足！');
+      showAlert('金钱不足！', '提示');
       return;
     }
     
@@ -99,13 +101,13 @@ export function PoliticsPanel({ onClose }: PoliticsPanelProps) {
     
     const cost = facilityCosts[facilityType];
     if (currentCity.resources.money < cost) {
-      alert('金钱不足！');
+      showAlert('金钱不足！', '提示');
       return;
     }
     
     const currentLevel = currentCity.facilities[facilityType];
     if (currentLevel >= 5) {
-      alert('设施已达最高等级！');
+      showAlert('设施已达最高等级！', '提示');
       return;
     }
     

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useGameStore } from '@/store';
+import { useDialogStore } from '@/store/dialogStore';
 import type { General, Title, Item } from '@/types';
 
 interface GeneralPanelProps {
@@ -22,6 +23,7 @@ export function GeneralPanel({ onClose }: GeneralPanelProps) {
     updateItem,
     getGeneralRelations 
   } = useGameStore();
+  const { showAlert } = useDialogStore();
   
   const [sortType, setSortType] = useState<SortType>('command');
   const [sortAsc, setSortAsc] = useState(false);
@@ -126,19 +128,19 @@ export function GeneralPanel({ onClose }: GeneralPanelProps) {
     
     // 检查条件
     if (selectedGeneral.merit < title.requirements.minMerit) {
-      alert(`功勋不足，需要 ${title.requirements.minMerit} 功勋`);
+      showAlert(`功勋不足，需要 ${title.requirements.minMerit} 功勋`, '提示');
       return;
     }
     if (title.requirements.minCommand && selectedGeneral.attributes.command < title.requirements.minCommand) {
-      alert(`统率不足，需要 ${title.requirements.minCommand} 统率`);
+      showAlert(`统率不足，需要 ${title.requirements.minCommand} 统率`, '提示');
       return;
     }
     if (title.requirements.minForce && selectedGeneral.attributes.force < title.requirements.minForce) {
-      alert(`武力不足，需要 ${title.requirements.minForce} 武力`);
+      showAlert(`武力不足，需要 ${title.requirements.minForce} 武力`, '提示');
       return;
     }
     if (playerFaction.resources.money < title.cost) {
-      alert(`金钱不足，需要 ${title.cost} 金`);
+      showAlert(`金钱不足，需要 ${title.cost} 金`, '提示');
       return;
     }
     

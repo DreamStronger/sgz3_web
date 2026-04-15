@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useGameStore } from '@/store';
+import { useDialogStore } from '@/store/dialogStore';
 import { ArmyMovementPanel } from './ArmyMovementPanel';
 import type { Army, Unit, Formation } from '@/types';
 
@@ -18,6 +19,7 @@ export function ArmyPanel({ onClose }: ArmyPanelProps) {
     deleteArmy,
     updateCity
   } = useGameStore();
+  const { showAlert } = useDialogStore();
 
   const [selectedCity, setSelectedCity] = useState<string>('');
   const [selectedGeneral, setSelectedGeneral] = useState<string>('');
@@ -61,17 +63,17 @@ export function ArmyPanel({ onClose }: ArmyPanelProps) {
   // 创建军队
   const handleCreateArmy = () => {
     if (!selectedCity || !selectedGeneral || totalSoldiers === 0) {
-      alert('请选择城市、武将和士兵数量');
+      showAlert('请选择城市、武将和士兵数量', '提示');
       return;
     }
 
     if (totalSoldiers > citySoldiers) {
-      alert('士兵数量不足');
+      showAlert('士兵数量不足', '提示');
       return;
     }
 
     if (totalSoldiers > generalMaxSoldiers) {
-      alert(`武将带兵上限为 ${generalMaxSoldiers}`);
+      showAlert(`武将带兵上限为 ${generalMaxSoldiers}`, '提示');
       return;
     }
 
