@@ -248,7 +248,7 @@ export class SearchSystem {
   /**
    * 计算搜索消耗
    */
-  static calculateSearchCost(general: General, city: City): {
+  static calculateSearchCost(_general: General, city: City): { // general预留参数
     money: number;
     actionPoints: number;
   } {

@@ -175,7 +175,7 @@ export class DuelSystem {
    * 决定行动
    */
   private static decideAction(
-    general: General,
+    _general: General, // 预留参数
     currentHP: number,
     maxHP: number
   ): 'attack' | 'defend' | 'skill' {
@@ -210,7 +210,7 @@ export class DuelSystem {
   private static calculateDamage(
     attacker: General,
     defender: General,
-    relations: GeneralRelation[],
+    _relations: GeneralRelation[], // 预留参数
     isSkill: boolean
   ): number {
     // 基础伤害
@@ -305,8 +305,8 @@ export class DuelSystem {
    * 计算单挑对士气的影响
    */
   static calculateDuelMoraleEffect(
-    winnerId: string,
-    loserId: string,
+    _winnerId: string, // 预留参数
+    _loserId: string, // 预留参数
     surrendered: boolean,
     captured: boolean
   ): { winnerMorale: number; loserMorale: number } {

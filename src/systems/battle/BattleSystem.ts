@@ -9,9 +9,7 @@ import type {
   Formation, 
   Tactics, 
   Stratagem,
-  City,
-  Weather,
-  BattleType
+  City
 } from '@/types';
 
 // 兵种克制关系
@@ -83,7 +81,7 @@ export class BattleSystem {
   private attackerUnits: CombatUnit[] = [];
   private defenderUnits: CombatUnit[] = [];
   private generals: Record<string, General>;
-  private formations: Record<string, Formation>;
+  // private formations: Record<string, Formation>; // 预留字段
   private tactics: Record<string, Tactics>;
   private stratagems: Record<string, Stratagem>;
   private city?: City;
@@ -91,14 +89,14 @@ export class BattleSystem {
   constructor(
     battle: Battle,
     generals: Record<string, General>,
-    formations: Record<string, Formation>,
+    _formations: Record<string, Formation>, // 预留参数
     tactics: Record<string, Tactics>,
     stratagems: Record<string, Stratagem>,
     city?: City
   ) {
     this.battle = battle;
     this.generals = generals;
-    this.formations = formations;
+    // this.formations = formations; // 预留字段
     this.tactics = tactics;
     this.stratagems = stratagems;
     this.city = city;

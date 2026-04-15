@@ -306,7 +306,7 @@ export class SiegeSystem {
   /**
    * 计算炮击伤害
    */
-  private static calculateBombardDamage(formation: Formation, weather: Weather): number {
+  private static calculateBombardDamage(_formation: Formation, weather: Weather): number {
     let damage = 10 + Math.random() * 20;
     
     // 天气影响
@@ -322,7 +322,7 @@ export class SiegeSystem {
   private static useSiegeEquipment(
     equipment: SiegeEquipment,
     wallIntegrity: number,
-    maxWallIntegrity: number
+    _maxWallIntegrity: number // 预留参数
   ): { wallIntegrity: number; attackerDamage: number; defenderDamage: number } {
     let wallDamage = 0;
     let attackerDamage = 0;

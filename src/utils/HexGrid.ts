@@ -291,7 +291,7 @@ export class HexGrid {
   setHexSize(size: number): void {
     this.hexSize = size;
     // 重新计算所有格子的中心点和顶点
-    this.cells.forEach((cell, key) => {
+    this.cells.forEach((cell) => {
       const center = this.hexToPixel(cell.q, cell.r);
       cell.center = center;
       cell.vertices = this.getHexVertices(center.x, center.y);

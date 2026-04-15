@@ -18,7 +18,7 @@ interface DialogStore {
   dialog: DialogState;
   showDialog: (options: Partial<DialogState>) => void;
   showAlert: (message: string, title?: string) => void;
-  showConfirm: (message: string, onConfirm: () => void, title?: string) => void;
+  showConfirm: (message: string, title?: string) => Promise<boolean>;
   closeDialog: () => void;
 }
 
@@ -57,29 +57,36 @@ export const useDialogStore = create<DialogStore>((set, get) => ({
     },
   }),
   
-  showConfirm: (message, onConfirm, title = '确认') => set({
-    dialog: {
-      isOpen: true,
-      title,
-      message,
-      type: 'warning',
-      buttons: [
-        {
-          label: '取消',
-          variant: 'secondary',
-          onClick: () => get().closeDialog(),
+  showConfirm: (message, title = '确认') => {
+    return new Promise<boolean>((resolve) => {
+      set({
+        dialog: {
+          isOpen: true,
+          title,
+          message,
+          type: 'warning',
+          buttons: [
+            {
+              label: '取消',
+              variant: 'secondary',
+              onClick: () => {
+                resolve(false);
+                get().closeDialog();
+              },
+            },
+            {
+              label: '确定',
+              variant: 'primary',
+              onClick: () => {
+                resolve(true);
+                get().closeDialog();
+              },
+            },
+          ],
         },
-        {
-          label: '确定',
-          variant: 'primary',
-          onClick: () => {
-            onConfirm();
-            get().closeDialog();
-          },
-        },
-      ],
-    },
-  }),
+      });
+    });
+  },
   
   closeDialog: () => set({
     dialog: initialState,

@@ -395,7 +395,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       
       if (newProgress >= 100) {
         // 移动完成
-        const targetCity = state.cities[movement.targetCity];
+        // const targetCity = state.cities[movement.targetCity]; // 预留变量
         
         updatedArmies[armyId] = {
           ...army,

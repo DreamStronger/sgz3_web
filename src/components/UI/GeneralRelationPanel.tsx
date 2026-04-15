@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useGameStore } from '@/store';
-import type { General, GeneralRelation } from '@/types';
+import type { GeneralRelation } from '@/types';
 
 interface GeneralRelationPanelProps {
   generalId: string;

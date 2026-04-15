@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useBattleStore, useGameStore } from '@/store';
-import type { Formation, Tactics, Stratagem, General } from '@/types';
 
 interface BattleFieldProps {
   onClose?: () => void;
@@ -21,7 +20,7 @@ export function BattleField({ onClose }: BattleFieldProps) {
     clearBattle
   } = useBattleStore();
   
-  const { generals, formations, tactics, stratagems, cities } = useGameStore();
+  const { formations, tactics, stratagems, cities } = useGameStore();
   
   const [selectedTactics, setSelectedTactics] = useState<string>('');
   const [selectedStratagem, setSelectedStratagem] = useState<string>('');
@@ -187,7 +186,7 @@ export function BattleField({ onClose }: BattleFieldProps) {
               </div>
             </div>
             <div className="flex-1 overflow-y-auto space-y-2 pr-2">
-              {battleState.attackerUnits.map((unit, idx) => renderUnitCard(unit, true))}
+              {battleState.attackerUnits.map((unit) => renderUnitCard(unit, true))}
             </div>
           </div>
           
@@ -224,7 +223,7 @@ export function BattleField({ onClose }: BattleFieldProps) {
               </div>
             </div>
             <div className="flex-1 overflow-y-auto space-y-2 pr-2">
-              {battleState.defenderUnits.map((unit, idx) => renderUnitCard(unit, false))}
+              {battleState.defenderUnits.map((unit) => renderUnitCard(unit, false))}
             </div>
           </div>
         </div>

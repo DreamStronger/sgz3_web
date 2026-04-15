@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useGameStore } from '@/store';
 import { useDialogStore } from '@/store/dialogStore';
 import { RelationSystem } from '@/systems/relation/RelationSystem';
-import type { General, Captive, Title } from '@/types';
+import type { Captive } from '@/types';
 
 interface CaptivePanelProps {
   onClose: () => void;

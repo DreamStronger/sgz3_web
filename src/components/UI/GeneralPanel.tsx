@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useGameStore } from '@/store';
 import { useDialogStore } from '@/store/dialogStore';
 import { GeneralRelationPanel } from './GeneralRelationPanel';
-import type { General, Title, Item } from '@/types';
+import type { General, Item } from '@/types';
 
 interface GeneralPanelProps {
   onClose: () => void;
@@ -18,7 +18,6 @@ export function GeneralPanel({ onClose }: GeneralPanelProps) {
     factions, 
     items,
     titles,
-    relations,
     updateGeneral, 
     updateFaction,
     updateItem,

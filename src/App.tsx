@@ -6,9 +6,11 @@ import { PoliticsPanel } from './components/UI/PoliticsPanel';
 import { GeneralPanel } from './components/UI/GeneralPanel';
 import { ArmyPanel } from './components/UI/ArmyPanel';
 import { CaptivePanel } from './components/UI/CaptivePanel';
+import { SupplyTransportPanel } from './components/UI/SupplyTransportPanel';
 import { Dialog } from './components/UI/Dialog';
 import { BattleField } from './components/Battle/BattleField';
 import { useGameStore, useBattleStore } from './store';
+import { SupplySystem, FoodShortageLevel } from './systems/supply/SupplySystem';
 import type { City, Faction, General, Title, GeneralRelation, Formation, Tactics, Stratagem, Battle, Unit } from './types';
 import citiesData from './data/cities/yellow_turban.json';
 import generalsData from './data/generals/yellow_turban.json';
@@ -27,6 +29,7 @@ function App() {
   const [showGeneralPanel, setShowGeneralPanel] = useState(false);
   const [showArmyPanel, setShowArmyPanel] = useState(false);
   const [showCaptivePanel, setShowCaptivePanel] = useState(false);
+  const [showSupplyPanel, setShowSupplyPanel] = useState(false);
   const [showBattle, setShowBattle] = useState(false);
   
   const { 
@@ -65,7 +68,7 @@ function App() {
       });
 
       const generalsRecord: Record<string, General> = {};
-      (generalsData as General[]).forEach(general => {
+      (generalsData as unknown as General[]).forEach(general => {
         generalsRecord[general.id] = general;
       });
 
@@ -121,6 +124,7 @@ function App() {
       loadGame({
         turn: 1,
         season: 'spring',
+        weather: 'sunny',
         scenario: 'yellow_turban',
         factions: factionsRecord,
         cities: citiesRecord,
@@ -185,14 +189,50 @@ function App() {
         (1 + city.facilities.barracks * 0.1)
       );
 
+      // 更新城市资源（先加产出）
+      let newFood = city.resources.food + foodIncome;
+      let newSoldiers = city.resources.soldiers + soldierIncome;
+      
+      // 计算粮草消耗
+      const foodConsumption = SupplySystem.calculateCityFoodConsumption(city);
+      const foodResult = SupplySystem.applyFoodConsumption(
+        newFood,
+        foodConsumption,
+        city.stats.morale
+      );
+      
+      // 应用粮草消耗结果
+      newFood = foodResult.remainingFood;
+      
+      // 如果有士兵逃亡
+      if (foodResult.soldierLoss > 0) {
+        newSoldiers = Math.max(0, newSoldiers - foodResult.soldierLoss);
+      }
+      
       // 更新城市资源
       updateCity(city.id, {
         resources: {
           money: city.resources.money + moneyIncome,
-          food: city.resources.food + foodIncome,
-          soldiers: city.resources.soldiers + soldierIncome
+          food: newFood,
+          soldiers: newSoldiers
         }
       });
+      
+      // 如果粮草不足，更新民心
+      if (foodResult.shortageLevel !== FoodShortageLevel.NONE) {
+        const newMorale = Math.max(0, city.stats.morale + foodResult.moralePenalty);
+        updateCity(city.id, {
+          stats: {
+            ...city.stats,
+            morale: newMorale
+          }
+        });
+        
+        // 显示警告（只在玩家城市）
+        if (city.faction === currentPlayer && foodResult.shortageLevel !== FoodShortageLevel.LIGHT) {
+          console.warn(`${city.name}: ${foodResult.message}`);
+        }
+      }
     });
 
     // 更新势力总资源
@@ -581,6 +621,12 @@ function App() {
                 <span>俘虏</span>
               </button>
               <button 
+                onClick={() => setShowSupplyPanel(true)}
+                className="bg-gradient-to-br from-yellow-900/80 to-yellow-800/80 hover:from-yellow-800/90 hover:to-yellow-700/90 px-6 py-2.5 rounded-lg text-sm font-medium transition-all shadow-lg border border-yellow-600/40 flex items-center space-x-2" style={{ fontFamily: '"STKaiti", "KaiTi", serif' }}>
+                <span>🌾</span>
+                <span>粮草</span>
+              </button>
+              <button 
                 onClick={handleTestBattle}
                 className="bg-gradient-to-br from-orange-900/80 to-orange-800/80 hover:from-orange-800/90 hover:to-orange-700/90 px-6 py-2.5 rounded-lg text-sm font-medium transition-all shadow-lg border border-orange-600/40 flex items-center space-x-2" style={{ fontFamily: '"STKaiti", "KaiTi", serif' }}>
                 <span>🔥</span>
@@ -701,6 +747,11 @@ function App() {
           {/* 俘虏管理面板 */}
           {showCaptivePanel && (
             <CaptivePanel onClose={() => setShowCaptivePanel(false)} />
+          )}
+          
+          {/* 粮草运输面板 */}
+          {showSupplyPanel && (
+            <SupplyTransportPanel onClose={() => setShowSupplyPanel(false)} />
           )}
           
           {/* 战斗界面 */}

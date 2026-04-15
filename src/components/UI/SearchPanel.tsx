@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useGameStore } from '@/store';
 import { useDialogStore } from '@/store/dialogStore';
 import { SearchSystem } from '@/systems/search/SearchSystem';
-import type { General, City } from '@/types';
 
 interface SearchPanelProps {
   cityId: string;

@@ -102,7 +102,9 @@ export function ArmyPanel({ onClose }: ArmyPanelProps) {
       supplies: {
         food: totalSoldiers * 10,
         maxFood: totalSoldiers * 20
-      }
+      },
+      morale: 80,
+      fatigue: 0
     };
 
     createArmy(newArmy);
