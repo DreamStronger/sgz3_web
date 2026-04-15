@@ -9,6 +9,8 @@ import { CaptivePanel } from './components/UI/CaptivePanel';
 import { SupplyTransportPanel } from './components/UI/SupplyTransportPanel';
 import { BattleSelectPanel } from './components/UI/BattleSelectPanel';
 import { DiplomacyPanel } from './components/UI/DiplomacyPanel';
+import { SaveLoadPanel } from './components/UI/SaveLoadPanel';
+import { AudioSettingsPanel } from './components/UI/AudioSettingsPanel';
 import { Dialog } from './components/UI/Dialog';
 import { BattleField } from './components/Battle/BattleField';
 import { useGameStore } from './store';
@@ -34,6 +36,9 @@ function App() {
   const [showSupplyPanel, setShowSupplyPanel] = useState(false);
   const [showBattlePanel, setShowBattlePanel] = useState(false);
   const [showDiplomacyPanel, setShowDiplomacyPanel] = useState(false);
+  const [showSavePanel, setShowSavePanel] = useState(false);
+  const [showLoadPanel, setShowLoadPanel] = useState(false);
+  const [showAudioSettings, setShowAudioSettings] = useState(false);
   const [showBattle, setShowBattle] = useState(false);
   
   const { 
@@ -549,14 +554,28 @@ function App() {
                 <span>外交</span>
               </button>
               <button 
+                onClick={() => setShowSavePanel(true)}
+                className="bg-gradient-to-br from-cyan-900/80 to-cyan-800/80 hover:from-cyan-800/90 hover:to-cyan-700/90 px-6 py-2.5 rounded-lg text-sm font-medium transition-all shadow-lg border border-cyan-600/40 flex items-center space-x-2" style={{ fontFamily: '"STKaiti", "KaiTi", serif' }}>
+                <span>💾</span>
+                <span>存档</span>
+              </button>
+              <button 
+                onClick={() => setShowLoadPanel(true)}
+                className="bg-gradient-to-br from-teal-900/80 to-teal-800/80 hover:from-teal-800/90 hover:to-teal-700/90 px-6 py-2.5 rounded-lg text-sm font-medium transition-all shadow-lg border border-teal-600/40 flex items-center space-x-2" style={{ fontFamily: '"STKaiti", "KaiTi", serif' }}>
+                <span>📂</span>
+                <span>读取</span>
+              </button>
+              <button 
                 onClick={() => setShowGeneralPanel(true)}
                 className="bg-gradient-to-br from-purple-900/80 to-purple-800/80 hover:from-purple-800/90 hover:to-purple-700/90 px-6 py-2.5 rounded-lg text-sm font-medium transition-all shadow-lg border border-purple-600/40 flex items-center space-x-2" style={{ fontFamily: '"STKaiti", "KaiTi", serif' }}>
                 <span>👤</span>
                 <span>武将</span>
               </button>
-              <button className="bg-gradient-to-br from-stone-800/80 to-stone-700/80 hover:from-stone-700/90 hover:to-stone-600/90 px-6 py-2.5 rounded-lg text-sm font-medium transition-all shadow-lg border border-stone-600/40 flex items-center space-x-2" style={{ fontFamily: '"STKaiti", "KaiTi", serif' }}>
+              <button 
+                onClick={() => setShowAudioSettings(true)}
+                className="bg-gradient-to-br from-stone-800/80 to-stone-700/80 hover:from-stone-700/90 hover:to-stone-600/90 px-6 py-2.5 rounded-lg text-sm font-medium transition-all shadow-lg border border-stone-600/40 flex items-center space-x-2" style={{ fontFamily: '"STKaiti", "KaiTi", serif' }}>
                 <span>⚙️</span>
-                <span>系统</span>
+                <span>设置</span>
               </button>
             </div>
           </div>
@@ -674,6 +693,21 @@ function App() {
           {/* 外交面板 */}
           {showDiplomacyPanel && (
             <DiplomacyPanel onClose={() => setShowDiplomacyPanel(false)} />
+          )}
+          
+          {/* 存档面板 */}
+          {showSavePanel && (
+            <SaveLoadPanel mode="save" onClose={() => setShowSavePanel(false)} />
+          )}
+          
+          {/* 读取面板 */}
+          {showLoadPanel && (
+            <SaveLoadPanel mode="load" onClose={() => setShowLoadPanel(false)} />
+          )}
+          
+          {/* 音频设置面板 */}
+          {showAudioSettings && (
+            <AudioSettingsPanel onClose={() => setShowAudioSettings(false)} />
           )}
           
           {/* 战斗界面 */}
