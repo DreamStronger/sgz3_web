@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useMapStore, useGameStore } from '@/store';
-import type { City, Faction, Army } from '@/types';
+import { HexGrid, HexCell } from '@/utils/HexGrid';
+import type { City, Faction } from '@/types';
 
 interface GameMapProps {
   cities: City[];
@@ -22,6 +23,114 @@ export function GameMap({ cities }: GameMapProps) {
   const [hoveredCity, setHoveredCity] = useState<string | null>(null);
   const [canvasSize, setCanvasSize] = useState({ width: 900, height: 600 });
 
+  // 地图基础尺寸
+  const MAP_WIDTH = 2400;
+  const MAP_HEIGHT = 1600;
+  const BASE_SCALE = 0.6;
+
+  // 六边形网格配置
+  const HEX_SIZE = 80; // 六边形大小
+  const hexGridRef = useRef<HexGrid | null>(null);
+  const renderCacheRef = useRef<{
+    lastViewport: { x: number; y: number; zoom: number } | null;
+    needsRedraw: boolean;
+  }>({ lastViewport: null, needsRedraw: true });
+
+  // 州颜色映射
+  const stateColors: Record<string, { fill: string; stroke: string }> = {
+    '司隶': { fill: 'rgba(180, 100, 100, 0.25)', stroke: 'rgba(220, 120, 120, 0.6)' },
+    '雍州': { fill: 'rgba(100, 150, 180, 0.25)', stroke: 'rgba(120, 180, 220, 0.6)' },
+    '益州': { fill: 'rgba(100, 180, 100, 0.25)', stroke: 'rgba(120, 220, 120, 0.6)' },
+    '荆州': { fill: 'rgba(180, 180, 100, 0.25)', stroke: 'rgba(220, 220, 120, 0.6)' },
+    '扬州': { fill: 'rgba(100, 180, 180, 0.25)', stroke: 'rgba(120, 220, 220, 0.6)' },
+    '豫州': { fill: 'rgba(180, 130, 100, 0.25)', stroke: 'rgba(220, 160, 120, 0.6)' },
+    '冀州': { fill: 'rgba(150, 100, 180, 0.25)', stroke: 'rgba(180, 120, 220, 0.6)' },
+    '并州': { fill: 'rgba(180, 150, 100, 0.25)', stroke: 'rgba(220, 180, 120, 0.6)' },
+    '幽州': { fill: 'rgba(100, 130, 180, 0.25)', stroke: 'rgba(120, 160, 220, 0.6)' },
+    '徐州': { fill: 'rgba(150, 180, 130, 0.25)', stroke: 'rgba(180, 220, 160, 0.6)' },
+  };
+
+  // 初始化六边形网格
+  useEffect(() => {
+    const hexGrid = new HexGrid(HEX_SIZE, { x: MAP_WIDTH / 2, y: MAP_HEIGHT / 2 });
+    
+    // 生成覆盖整个地图的六边形网格
+    const cols = Math.ceil(MAP_WIDTH / (HEX_SIZE * 1.5)) + 2;
+    const rows = Math.ceil(MAP_HEIGHT / (HEX_SIZE * Math.sqrt(3))) + 2;
+    
+    // 生成网格
+    for (let r = -rows; r <= rows; r++) {
+      const rOffset = Math.floor(r / 2);
+      for (let q = -cols - rOffset; q <= cols - rOffset; q++) {
+        const center = hexGrid.hexToPixel(q, r);
+        
+        // 只添加在地图范围内的六边形
+        if (center.x >= -HEX_SIZE && center.x <= MAP_WIDTH + HEX_SIZE &&
+            center.y >= -HEX_SIZE && center.y <= MAP_HEIGHT + HEX_SIZE) {
+          
+          // 确定六边形所属的州
+          const state = determineState(center.x, center.y);
+          
+          // 确定地形类型
+          const terrain = determineTerrain(center.x, center.y);
+          
+          hexGrid.addCell(q, r, { state, terrain });
+        }
+      }
+    }
+    
+    hexGridRef.current = hexGrid;
+  }, []);
+
+  // 根据坐标确定所属州
+  const determineState = (x: number, y: number): string => {
+    // 定义各州的大致边界（简化版）
+    if (x < 500) {
+      if (y < 800) return '雍州';
+      if (y < 1200) return '益州';
+      return '益州';
+    } else if (x < 1000) {
+      if (y < 600) return '并州';
+      if (y < 900) return '司隶';
+      if (y < 1200) return '荆州';
+      return '益州';
+    } else if (x < 1500) {
+      if (y < 400) return '并州';
+      if (y < 700) return '冀州';
+      if (y < 1000) return '司隶';
+      if (y < 1300) return '荆州';
+      return '扬州';
+    } else if (x < 2000) {
+      if (y < 300) return '幽州';
+      if (y < 600) return '冀州';
+      if (y < 900) return '豫州';
+      if (y < 1200) return '扬州';
+      return '扬州';
+    } else {
+      if (y < 500) return '幽州';
+      if (y < 900) return '徐州';
+      return '扬州';
+    }
+  };
+
+  // 根据坐标确定地形
+  const determineTerrain = (x: number, y: number): 'plain' | 'mountain' | 'water' | 'pass' => {
+    // 水域区域
+    if ((x > 2100 && y > 1100) || (x > 1650 && y > 1350) || (x > 650 && y > 1250)) {
+      return 'water';
+    }
+    // 山地区域
+    if ((x < 350 && y < 400) || (x < 200 && y > 1200) || (x > 1100 && x < 1300 && y < 200) || 
+        (x > 250 && x < 350 && y > 900 && y < 1100)) {
+      return 'mountain';
+    }
+    // 关隘区域
+    if ((x > 900 && x < 1100 && y > 950 && y < 1050)) {
+      return 'pass';
+    }
+    return 'plain';
+  };
+
   // 监听容器尺寸变化
   useEffect(() => {
     const container = containerRef.current;
@@ -32,12 +141,10 @@ export function GameMap({ cities }: GameMapProps) {
       const maxWidth = rect.width * 0.9;
       const maxHeight = rect.height * 0.9;
       
-      // 保持 2:1 比例，取能完整显示的最大尺寸
       const aspectRatio = 2 / 1;
       let width = maxWidth;
       let height = width / aspectRatio;
       
-      // 如果高度超出，则按高度计算
       if (height > maxHeight) {
         height = maxHeight;
         width = height * aspectRatio;
@@ -59,14 +166,19 @@ export function GameMap({ cities }: GameMapProps) {
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    renderMap(ctx);
+    
+    // 检查是否需要重绘（视口变化时）
+    const viewportChanged = !renderCacheRef.current.lastViewport ||
+      renderCacheRef.current.lastViewport.x !== viewport.x ||
+      renderCacheRef.current.lastViewport.y !== viewport.y ||
+      renderCacheRef.current.lastViewport.zoom !== viewport.zoom;
+    
+    if (viewportChanged || renderCacheRef.current.needsRedraw) {
+      renderMap(ctx);
+      renderCacheRef.current.lastViewport = { ...viewport };
+      renderCacheRef.current.needsRedraw = false;
+    }
   }, [cities, viewport, selectedCity, hoveredCity, factions, canvasSize, season, weather, armies]);
-
-  // 地图基础尺寸
-  const MAP_WIDTH = 2400;
-  const MAP_HEIGHT = 1600;
-  // 固定缩放比例，让可视区域比地图小，需要拖拽查看
-  const BASE_SCALE = 0.6; // 基础缩放比例，控制地图显示范围
 
   // 缩放处理
   const handleZoom = useCallback((delta: number) => {
@@ -86,26 +198,21 @@ export function GameMap({ cities }: GameMapProps) {
     const { width, height } = canvasSize;
     ctx.clearRect(0, 0, width, height);
     
-    // 使用固定缩放比例
     const scale = BASE_SCALE * viewport.zoom;
     
     ctx.save();
-    // 先移动到canvas中心
     ctx.translate(width / 2, height / 2);
-    // 应用缩放
     ctx.scale(scale, scale);
-    // 应用拖拽偏移（在缩放后的坐标系中）
     ctx.translate(viewport.x, viewport.y);
-    // 移动回地图中心
     ctx.translate(-MAP_WIDTH / 2, -MAP_HEIGHT / 2);
     
-    // 绘制州属区域
-    drawStateRegions(ctx);
+    // 绘制六边形网格
+    drawHexGrid(ctx);
     
     // 绘制城市间连线
     drawCityConnections(ctx);
     
-    // 绘制城市（保留交互功能）
+    // 绘制城市
     cities.forEach(city => drawCity(ctx, city));
     
     // 绘制军队
@@ -118,107 +225,119 @@ export function GameMap({ cities }: GameMapProps) {
     drawTitle(ctx);
   };
 
-
-  const drawStateRegions = (ctx: CanvasRenderingContext2D) => {
-    // 州颜色映射
-    const stateColors: Record<string, { fill: string; stroke: string }> = {
-      '司隶': { fill: 'rgba(180, 100, 100, 0.2)', stroke: 'rgba(220, 120, 120, 0.5)' },
-      '雍州': { fill: 'rgba(100, 150, 180, 0.2)', stroke: 'rgba(120, 180, 220, 0.5)' },
-      '益州': { fill: 'rgba(100, 180, 100, 0.2)', stroke: 'rgba(120, 220, 120, 0.5)' },
-      '荆州': { fill: 'rgba(180, 180, 100, 0.2)', stroke: 'rgba(220, 220, 120, 0.5)' },
-      '扬州': { fill: 'rgba(100, 180, 180, 0.2)', stroke: 'rgba(120, 220, 220, 0.5)' },
-      '豫州': { fill: 'rgba(180, 130, 100, 0.2)', stroke: 'rgba(220, 160, 120, 0.5)' },
-      '冀州': { fill: 'rgba(150, 100, 180, 0.2)', stroke: 'rgba(180, 120, 220, 0.5)' },
-      '并州': { fill: 'rgba(180, 150, 100, 0.2)', stroke: 'rgba(220, 180, 120, 0.5)' },
-      '幽州': { fill: 'rgba(100, 130, 180, 0.2)', stroke: 'rgba(120, 160, 220, 0.5)' },
-      '徐州': { fill: 'rgba(150, 180, 130, 0.2)', stroke: 'rgba(180, 220, 160, 0.5)' },
-    };
+  // 绘制六边形网格
+  const drawHexGrid = (ctx: CanvasRenderingContext2D) => {
+    if (!hexGridRef.current) return;
     
-    // 手动定义每个州的边界多边形（确保相邻州共享边界点）
-    const statePolygons: Record<string, { x: number; y: number }[]> = {
-      '雍州': [
-        { x: 50, y: 50 }, { x: 400, y: 50 }, { x: 700, y: 200 },
-        { x: 700, y: 500 }, { x: 500, y: 700 }, { x: 500, y: 900 },
-        { x: 300, y: 900 }, { x: 50, y: 900 }, { x: 30, y: 660 }
-      ],
-      '并州': [
-        { x: 400, y: 50 }, { x: 800, y: 20 }, { x: 1300, y: 50 },
-        { x: 1300, y: 200 }, { x: 1100, y: 300 }, { x: 900, y: 400 },
-        { x: 700, y: 500 }, { x: 700, y: 200 }
-      ],
-      '幽州': [
-        { x: 1300, y: 50 }, { x: 1850, y: 20 }, { x: 2350, y: 50 },
-        { x: 2350, y: 400 }, { x: 1700, y: 500 }, { x: 1700, y: 230 },
-        { x: 1300, y: 200 }
-      ],
-      '冀州': [
-        { x: 700, y: 500 }, { x: 900, y: 400 }, { x: 1100, y: 300 },
-        { x: 1300, y: 200 }, { x: 1700, y: 230 }, { x: 1700, y: 500 },
-        { x: 1700, y: 700 }, { x: 1300, y: 800 }, { x: 1300, y: 700 },
-        
-      ],
-      '司隶': [
-        { x: 500, y: 700 }, { x: 700, y: 500 }, { x: 1300, y: 700 },
-        { x: 1300, y: 800 }, { x: 1100, y: 900 }, { x: 900, y: 1000 },
-        { x: 700, y: 1000 }, { x: 500, y: 900 }
-      ],
-      '益州': [
-        { x: 50, y: 900 }, { x: 300, y: 900 }, { x: 500, y: 900 },
-        { x: 700, y: 1000 }, { x: 900, y: 1000 }, { x: 600, y: 1350 },
-        { x: 600, y: 1500 }, { x: 300, y: 1550 }, { x: 50, y: 1550 },
-        { x: 10, y: 1450 }
-      ],
-      '荆州': [
-        { x: 900, y: 1000 }, { x: 600, y: 1350 }, { x: 600, y: 1500 },
-        { x: 1100, y: 1400 }, { x: 1400, y: 1350 }, { x: 1400, y: 1100 }, 
-        { x: 1100, y: 900 }
-      ],
-      '豫州': [
-        { x: 1300, y: 800 }, { x: 1700, y: 700 }, { x: 1800, y: 900 }, 
-        { x: 1800, y: 1200 }, { x: 1500, y: 1300 }, { x: 1400, y: 1100 }, 
-        { x: 1100, y: 900 }
-      ],
-      '徐州': [
-        { x: 1700, y: 500 }, { x: 2350, y: 400 }, { x: 2350, y: 700 },
-        { x: 2350, y: 1000 }, { x: 2100, y: 1000 }, { x: 1800, y: 900 },
-        { x: 1700, y: 700 }
-      ],
-      '扬州': [
-        { x: 1400, y: 1100 }, { x: 1500, y: 1300 }, { x: 1800, y: 1200 },
-        { x: 1800, y: 900 }, { x: 2100, y: 1000 }, { x: 2350, y: 1000 },
-        { x: 2350, y: 1200 }, { x: 2350, y: 1550 }, { x: 1700, y: 1550 },
-        { x: 1400, y: 1350 }
-      ]
-    };
+    const cells = hexGridRef.current.getAllCells();
     
-    // 绘制每个州的区域
-    Object.entries(statePolygons).forEach(([state, polygon]) => {
+    // 按州分组绘制，减少状态切换
+    const stateGroups = new Map<string, HexCell[]>();
+    cells.forEach(cell => {
+      const state = cell.state || 'unknown';
+      if (!stateGroups.has(state)) {
+        stateGroups.set(state, []);
+      }
+      stateGroups.get(state)!.push(cell);
+    });
+    
+    // 绘制每个州的六边形
+    stateGroups.forEach((stateCells, state) => {
       const colors = stateColors[state] || { fill: 'rgba(60, 80, 120, 0.2)', stroke: 'rgba(100, 140, 200, 0.5)' };
       
-      if (polygon.length >= 3) {
-        ctx.beginPath();
-        ctx.moveTo(polygon[0].x, polygon[0].y);
-        for (let i = 1; i < polygon.length; i++) {
-          ctx.lineTo(polygon[i].x, polygon[i].y);
-        }
-        ctx.closePath();
-        
-        ctx.fillStyle = colors.fill;
-        ctx.fill();
-        ctx.strokeStyle = colors.stroke;
-        ctx.lineWidth = 3;
-        ctx.stroke();
-        
-        // 绘制州名
-        const centerX = polygon.reduce((sum, p) => sum + p.x, 0) / polygon.length;
-        const centerY = polygon.reduce((sum, p) => sum + p.y, 0) / polygon.length;
-        ctx.fillStyle = 'rgba(200, 200, 200, 0.5)';
-        ctx.font = 'bold 24px "SimSun", serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(state, centerX, centerY);
-      }
+      stateCells.forEach(cell => {
+        drawHexCell(ctx, cell, colors);
+      });
     });
+    
+    // 绘制州名标签
+    drawStateLabels(ctx, stateGroups);
+  };
+
+  // 绘制单个六边形
+  const drawHexCell = (ctx: CanvasRenderingContext2D, cell: HexCell, colors: { fill: string; stroke: string }) => {
+    const { vertices, center } = cell;
+    
+    if (vertices.length < 6) return;
+    
+    ctx.beginPath();
+    ctx.moveTo(vertices[0].x, vertices[0].y);
+    for (let i = 1; i < vertices.length; i++) {
+      ctx.lineTo(vertices[i].x, vertices[i].y);
+    }
+    ctx.closePath();
+    
+    // 根据地形调整填充色
+    let fillColor = colors.fill;
+    if (cell.terrain === 'water') {
+      fillColor = 'rgba(60, 120, 180, 0.3)';
+    } else if (cell.terrain === 'mountain') {
+      fillColor = 'rgba(120, 100, 80, 0.3)';
+    } else if (cell.terrain === 'pass') {
+      fillColor = 'rgba(180, 140, 100, 0.35)';
+    }
+    
+    ctx.fillStyle = fillColor;
+    ctx.fill();
+    
+    // 绘制边框
+    ctx.strokeStyle = colors.stroke;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    
+    // 绘制地形装饰
+    if (cell.terrain === 'mountain') {
+      drawMountainDecoration(ctx, center.x, center.y);
+    } else if (cell.terrain === 'water') {
+      drawWaterDecoration(ctx, center.x, center.y);
+    }
+  };
+
+  // 绘制山地装饰
+  const drawMountainDecoration = (ctx: CanvasRenderingContext2D, x: number, y: number) => {
+    ctx.fillStyle = 'rgba(100, 80, 60, 0.3)';
+    ctx.beginPath();
+    ctx.moveTo(x - 15, y + 10);
+    ctx.lineTo(x, y - 15);
+    ctx.lineTo(x + 15, y + 10);
+    ctx.closePath();
+    ctx.fill();
+  };
+
+  // 绘制水域装饰
+  const drawWaterDecoration = (ctx: CanvasRenderingContext2D, x: number, y: number) => {
+    ctx.strokeStyle = 'rgba(100, 160, 220, 0.3)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(x, y, 10, 0, Math.PI, true);
+    ctx.stroke();
+  };
+
+  // 绘制州名标签
+  const drawStateLabels = (ctx: CanvasRenderingContext2D, stateGroups: Map<string, HexCell[]>) => {
+    ctx.save();
+    
+    stateGroups.forEach((cells, state) => {
+      if (state === 'unknown' || cells.length === 0) return;
+      
+      // 计算州的中心位置
+      const centerX = cells.reduce((sum, cell) => sum + cell.center.x, 0) / cells.length;
+      const centerY = cells.reduce((sum, cell) => sum + cell.center.y, 0) / cells.length;
+      
+      // 绘制州名背景
+      ctx.fillStyle = 'rgba(13, 18, 25, 0.6)';
+      const textWidth = ctx.measureText(state).width + 20;
+      ctx.fillRect(centerX - textWidth / 2, centerY - 15, textWidth, 30);
+      
+      // 绘制州名
+      ctx.fillStyle = 'rgba(200, 200, 200, 0.7)';
+      ctx.font = 'bold 20px "SimSun", serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(state, centerX, centerY);
+    });
+    
+    ctx.restore();
   };
 
   const drawCityConnections = (ctx: CanvasRenderingContext2D) => {
@@ -261,7 +380,6 @@ export function GameMap({ cities }: GameMapProps) {
   };
 
   const drawCity = (ctx: CanvasRenderingContext2D, city: City) => {
-    // 直接使用城市原始坐标
     const x = city.position.x;
     const y = city.position.y;
     
@@ -368,7 +486,6 @@ export function GameMap({ cities }: GameMapProps) {
           ctx.beginPath();
           ctx.moveTo(armyX, armyY);
           
-          // 计算中间点
           const midX = (armyX + targetCity.position.x) / 2;
           const midY = (armyY + targetCity.position.y) / 2;
           ctx.quadraticCurveTo(midX, midY - 20, targetCity.position.x, targetCity.position.y);
@@ -485,7 +602,6 @@ export function GameMap({ cities }: GameMapProps) {
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
     
-    // 使用固定缩放比例
     const scale = BASE_SCALE * viewport.zoom;
     
     // 将鼠标坐标转换为地图坐标
@@ -496,7 +612,7 @@ export function GameMap({ cities }: GameMapProps) {
     const hovered = cities.find(city => {
       const dx = city.position.x - mouseX;
       const dy = city.position.y - mouseY;
-      return Math.sqrt(dx*dx + dy*dy) < 50; // 固定检测范围
+      return Math.sqrt(dx*dx + dy*dy) < 50;
     });
     setHoveredCity(hovered?.id || null);
     
@@ -505,7 +621,6 @@ export function GameMap({ cities }: GameMapProps) {
     const dx = e.clientX - dragStart.x;
     const dy = e.clientY - dragStart.y;
     
-    // 限制拖拽范围
     const maxOffsetX = MAP_WIDTH / 2;
     const maxOffsetY = MAP_HEIGHT / 2;
     
@@ -531,7 +646,6 @@ export function GameMap({ cities }: GameMapProps) {
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
     
-    // 使用固定缩放比例
     const scale = BASE_SCALE * viewport.zoom;
     
     // 将鼠标坐标转换为地图坐标

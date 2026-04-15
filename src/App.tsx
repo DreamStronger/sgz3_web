@@ -6,8 +6,9 @@ import { PoliticsPanel } from './components/UI/PoliticsPanel';
 import { GeneralPanel } from './components/UI/GeneralPanel';
 import { ArmyPanel } from './components/UI/ArmyPanel';
 import { Dialog } from './components/UI/Dialog';
-import { useGameStore } from './store';
-import type { City, Faction, General, Title, GeneralRelation, Formation, Tactics, Stratagem } from './types';
+import { BattleField } from './components/Battle/BattleField';
+import { useGameStore, useBattleStore } from './store';
+import type { City, Faction, General, Title, GeneralRelation, Formation, Tactics, Stratagem, Battle, Unit } from './types';
 import citiesData from './data/cities/yellow_turban.json';
 import generalsData from './data/generals/yellow_turban.json';
 import factionsData from './data/factions.json';
@@ -24,6 +25,8 @@ function App() {
   const [showPoliticsPanel, setShowPoliticsPanel] = useState(false);
   const [showGeneralPanel, setShowGeneralPanel] = useState(false);
   const [showArmyPanel, setShowArmyPanel] = useState(false);
+  const [showBattle, setShowBattle] = useState(false);
+  
   const { 
     turn, 
     season,
@@ -44,6 +47,8 @@ function App() {
     setTactics,
     setStratagems
   } = useGameStore();
+  
+  const { startBattle } = useBattleStore();
 
   // 加载游戏数据
   useEffect(() => {
@@ -283,6 +288,84 @@ function App() {
     };
     return icons[weather as keyof typeof icons] || '☀️';
   };
+  
+  // 测试战斗功能
+  const handleTestBattle = () => {
+    if (!currentPlayer || Object.keys(factions).length === 0) return;
+    
+    // 创建测试战斗
+    const attackerFaction = currentPlayer;
+    const defenderFaction = Object.keys(factions).find(id => id !== currentPlayer) || '';
+    
+    if (!defenderFaction) return;
+    
+    // 创建测试单位
+    const attackerUnits: Unit[] = [
+      { type: 'infantry', count: 2000, morale: 80, fatigue: 0, experience: 50 },
+      { type: 'cavalry', count: 1500, morale: 75, fatigue: 0, experience: 40 },
+      { type: 'archer', count: 1000, morale: 70, fatigue: 0, experience: 30 }
+    ];
+    
+    const defenderUnits: Unit[] = [
+      { type: 'infantry', count: 1800, morale: 75, fatigue: 0, experience: 45 },
+      { type: 'cavalry', count: 1200, morale: 70, fatigue: 0, experience: 35 },
+      { type: 'archer', count: 1500, morale: 72, fatigue: 0, experience: 40 }
+    ];
+    
+    // 分配武将
+    const attackerGenerals = factions[attackerFaction]?.generals.slice(0, 2) || [];
+    const defenderGenerals = factions[defenderFaction]?.generals.slice(0, 2) || [];
+    
+    if (attackerGenerals.length > 0) {
+      attackerUnits[0].general = attackerGenerals[0];
+    }
+    if (attackerGenerals.length > 1) {
+      attackerUnits[1].general = attackerGenerals[1];
+    }
+    
+    if (defenderGenerals.length > 0) {
+      defenderUnits[0].general = defenderGenerals[0];
+    }
+    if (defenderGenerals.length > 1) {
+      defenderUnits[1].general = defenderGenerals[1];
+    }
+    
+    const testBattle: Battle = {
+      id: `battle-${Date.now()}`,
+      type: 'field',
+      attacker: {
+        faction: attackerFaction,
+        generals: attackerGenerals,
+        units: attackerUnits,
+        formation: 'arrow'
+      },
+      defender: {
+        faction: defenderFaction,
+        generals: defenderGenerals,
+        units: defenderUnits,
+        formation: 'fish_scale'
+      },
+      location: Object.keys(cities)[0] || '',
+      terrain: 'plain',
+      weather: weather,
+      tactics: [],
+      stratagems: [],
+      turn: 0,
+      status: 'ongoing'
+    };
+    
+    // 启动战斗
+    startBattle(
+      testBattle,
+      generals,
+      formations,
+      tactics,
+      stratagems,
+      cities[testBattle.location]
+    );
+    
+    setShowBattle(true);
+  };
 
   const currentPlayerFaction = factions[currentPlayer];
   const playerGenerals = currentPlayerFaction?.generals.map(id => generals[id]).filter(Boolean) || [];
@@ -475,6 +558,12 @@ function App() {
                 <span>⚔️</span>
                 <span>军事</span>
               </button>
+              <button 
+                onClick={handleTestBattle}
+                className="bg-gradient-to-br from-orange-900/80 to-orange-800/80 hover:from-orange-800/90 hover:to-orange-700/90 px-6 py-2.5 rounded-lg text-sm font-medium transition-all shadow-lg border border-orange-600/40 flex items-center space-x-2" style={{ fontFamily: '"STKaiti", "KaiTi", serif' }}>
+                <span>🔥</span>
+                <span>测试战斗</span>
+              </button>
               <button className="bg-gradient-to-br from-green-900/80 to-green-800/80 hover:from-green-800/90 hover:to-green-700/90 px-6 py-2.5 rounded-lg text-sm font-medium transition-all shadow-lg border border-green-600/40 flex items-center space-x-2" style={{ fontFamily: '"STKaiti", "KaiTi", serif' }}>
                 <span>🤝</span>
                 <span>外交</span>
@@ -585,6 +674,11 @@ function App() {
           {/* 军队面板 */}
           {showArmyPanel && (
             <ArmyPanel onClose={() => setShowArmyPanel(false)} />
+          )}
+          
+          {/* 战斗界面 */}
+          {showBattle && (
+            <BattleField onClose={() => setShowBattle(false)} />
           )}
         </div>
       )}
