@@ -68,11 +68,13 @@ export function GameMap({ cities }: GameMapProps) {
         if (center.x >= -HEX_SIZE && center.x <= MAP_WIDTH + HEX_SIZE &&
             center.y >= -HEX_SIZE && center.y <= MAP_HEIGHT + HEX_SIZE) {
           
-          // 确定六边形所属的州
-          const state = determineState(center.x, center.y);
+          // 确定六边形所属的州（使用绝对坐标）
+          const absoluteX = center.x;
+          const absoluteY = center.y;
+          const state = determineState(absoluteX, absoluteY);
           
           // 确定地形类型
-          const terrain = determineTerrain(center.x, center.y);
+          const terrain = determineTerrain(absoluteX, absoluteY);
           
           hexGrid.addCell(q, r, { state, terrain });
         }
@@ -80,6 +82,16 @@ export function GameMap({ cities }: GameMapProps) {
     }
     
     hexGridRef.current = hexGrid;
+    
+    // 调试：输出第一个六边形的信息
+    const firstCell = hexGrid.getAllCells()[0];
+    if (firstCell) {
+      console.log('第一个六边形:', {
+        center: firstCell.center,
+        state: firstCell.state,
+        terrain: firstCell.terrain
+      });
+    }
   }, []);
 
   // 根据坐标确定所属州
@@ -231,6 +243,9 @@ export function GameMap({ cities }: GameMapProps) {
     
     const cells = hexGridRef.current.getAllCells();
     
+    console.log('绘制六边形网格，总数:', cells.length);
+    console.log('前5个六边形:', cells.slice(0, 5).map(c => ({ state: c.state, terrain: c.terrain, center: c.center })));
+    
     // 按州分组绘制，减少状态切换
     const stateGroups = new Map<string, HexCell[]>();
     cells.forEach(cell => {
@@ -240,6 +255,9 @@ export function GameMap({ cities }: GameMapProps) {
       }
       stateGroups.get(state)!.push(cell);
     });
+    
+    console.log('州分组:', Array.from(stateGroups.keys()));
+    console.log('各州数量:', Array.from(stateGroups.entries()).map(([state, cells]) => ({ state, count: cells.length })));
     
     // 绘制每个州的六边形
     stateGroups.forEach((stateCells, state) => {

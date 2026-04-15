@@ -291,13 +291,34 @@ function App() {
   
   // 测试战斗功能
   const handleTestBattle = () => {
-    if (!currentPlayer || Object.keys(factions).length === 0) return;
+    console.log('点击测试战斗按钮');
+    console.log('currentPlayer:', currentPlayer);
+    console.log('factions:', factions);
+    console.log('factions keys:', Object.keys(factions));
+    
+    if (!currentPlayer) {
+      console.log('错误：currentPlayer为空');
+      alert('请先开始游戏');
+      return;
+    }
+    
+    if (Object.keys(factions).length === 0) {
+      console.log('错误：factions为空');
+      alert('游戏数据未加载，请稍候');
+      return;
+    }
     
     // 创建测试战斗
     const attackerFaction = currentPlayer;
     const defenderFaction = Object.keys(factions).find(id => id !== currentPlayer) || '';
     
-    if (!defenderFaction) return;
+    console.log('attackerFaction:', attackerFaction);
+    console.log('defenderFaction:', defenderFaction);
+    
+    if (!defenderFaction) {
+      alert('没有找到敌方势力');
+      return;
+    }
     
     // 创建测试单位
     const attackerUnits: Unit[] = [
