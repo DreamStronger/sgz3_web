@@ -5,6 +5,7 @@ import { GameMap } from './components/Map/GameMap';
 import { PoliticsPanel } from './components/UI/PoliticsPanel';
 import { GeneralPanel } from './components/UI/GeneralPanel';
 import { ArmyPanel } from './components/UI/ArmyPanel';
+import { CaptivePanel } from './components/UI/CaptivePanel';
 import { Dialog } from './components/UI/Dialog';
 import { BattleField } from './components/Battle/BattleField';
 import { useGameStore, useBattleStore } from './store';
@@ -25,6 +26,7 @@ function App() {
   const [showPoliticsPanel, setShowPoliticsPanel] = useState(false);
   const [showGeneralPanel, setShowGeneralPanel] = useState(false);
   const [showArmyPanel, setShowArmyPanel] = useState(false);
+  const [showCaptivePanel, setShowCaptivePanel] = useState(false);
   const [showBattle, setShowBattle] = useState(false);
   
   const { 
@@ -573,6 +575,12 @@ function App() {
                 <span>军事</span>
               </button>
               <button 
+                onClick={() => setShowCaptivePanel(true)}
+                className="bg-gradient-to-br from-indigo-900/80 to-indigo-800/80 hover:from-indigo-800/90 hover:to-indigo-700/90 px-6 py-2.5 rounded-lg text-sm font-medium transition-all shadow-lg border border-indigo-600/40 flex items-center space-x-2" style={{ fontFamily: '"STKaiti", "KaiTi", serif' }}>
+                <span>⛓️</span>
+                <span>俘虏</span>
+              </button>
+              <button 
                 onClick={handleTestBattle}
                 className="bg-gradient-to-br from-orange-900/80 to-orange-800/80 hover:from-orange-800/90 hover:to-orange-700/90 px-6 py-2.5 rounded-lg text-sm font-medium transition-all shadow-lg border border-orange-600/40 flex items-center space-x-2" style={{ fontFamily: '"STKaiti", "KaiTi", serif' }}>
                 <span>🔥</span>
@@ -688,6 +696,11 @@ function App() {
           {/* 军队面板 */}
           {showArmyPanel && (
             <ArmyPanel onClose={() => setShowArmyPanel(false)} />
+          )}
+          
+          {/* 俘虏管理面板 */}
+          {showCaptivePanel && (
+            <CaptivePanel onClose={() => setShowCaptivePanel(false)} />
           )}
           
           {/* 战斗界面 */}
