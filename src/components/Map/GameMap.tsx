@@ -59,7 +59,20 @@ export function GameMap({ cities }: GameMapProps) {
     const cols = Math.ceil(MAP_WIDTH / (HEX_SIZE * 1.5)) + 2;
     const rows = Math.ceil(MAP_HEIGHT / (HEX_SIZE * Math.sqrt(3))) + 2;
     
-    // 生成网格
+    // 第一步：将城市位置对齐到六边形网格中心
+    const cityHexMap = new Map<string, { q: number; r: number; state: string }>();
+    
+    cities.forEach(city => {
+      // 找到城市最近的六边形坐标
+      const hexCoord = hexGrid.pixelToHex(city.position.x, city.position.y);
+      cityHexMap.set(city.id, {
+        q: hexCoord.q,
+        r: hexCoord.r,
+        state: city.state
+      });
+    });
+    
+    // 第二步：生成网格，根据最近城市确定州归属
     for (let r = -rows; r <= rows; r++) {
       const rOffset = Math.floor(r / 2);
       for (let q = -cols - rOffset; q <= cols - rOffset; q++) {
@@ -69,15 +82,23 @@ export function GameMap({ cities }: GameMapProps) {
         if (center.x >= -HEX_SIZE && center.x <= MAP_WIDTH + HEX_SIZE &&
             center.y >= -HEX_SIZE && center.y <= MAP_HEIGHT + HEX_SIZE) {
           
-          // 确定六边形所属的州（使用绝对坐标）
-          const absoluteX = center.x;
-          const absoluteY = center.y;
-          const state = determineState(absoluteX, absoluteY);
+          // 找到最近的城市，确定州归属
+          let nearestState = 'unknown';
+          let minDistance = Infinity;
+          
+          cityHexMap.forEach((cityHex) => {
+            // 计算六边形网格距离
+            const distance = hexGrid.distance(q, r, cityHex.q, cityHex.r);
+            if (distance < minDistance) {
+              minDistance = distance;
+              nearestState = cityHex.state;
+            }
+          });
           
           // 确定地形类型
-          const terrain = determineTerrain(absoluteX, absoluteY);
+          const terrain = determineTerrain(center.x, center.y);
           
-          hexGrid.addCell(q, r, { state, terrain });
+          hexGrid.addCell(q, r, { state: nearestState, terrain });
         }
       }
     }
@@ -86,38 +107,7 @@ export function GameMap({ cities }: GameMapProps) {
     
     // 标记网格已初始化，触发重新渲染
     setGridInitialized(true);
-  }, []);
-
-  // 根据坐标确定所属州
-  const determineState = (x: number, y: number): string => {
-    // 定义各州的大致边界（简化版）
-    if (x < 500) {
-      if (y < 800) return '雍州';
-      if (y < 1200) return '益州';
-      return '益州';
-    } else if (x < 1000) {
-      if (y < 600) return '并州';
-      if (y < 900) return '司隶';
-      if (y < 1200) return '荆州';
-      return '益州';
-    } else if (x < 1500) {
-      if (y < 400) return '并州';
-      if (y < 700) return '冀州';
-      if (y < 1000) return '司隶';
-      if (y < 1300) return '荆州';
-      return '扬州';
-    } else if (x < 2000) {
-      if (y < 300) return '幽州';
-      if (y < 600) return '冀州';
-      if (y < 900) return '豫州';
-      if (y < 1200) return '扬州';
-      return '扬州';
-    } else {
-      if (y < 500) return '幽州';
-      if (y < 900) return '徐州';
-      return '扬州';
-    }
-  };
+  }, [cities]);
 
   // 根据坐标确定地形
   const determineTerrain = (x: number, y: number): 'plain' | 'mountain' | 'water' | 'pass' => {
@@ -386,8 +376,16 @@ export function GameMap({ cities }: GameMapProps) {
   };
 
   const drawCity = (ctx: CanvasRenderingContext2D, city: City) => {
-    const x = city.position.x;
-    const y = city.position.y;
+    // 将城市位置对齐到六边形网格中心
+    let x = city.position.x;
+    let y = city.position.y;
+    
+    if (hexGridRef.current) {
+      const hexCoord = hexGridRef.current.pixelToHex(x, y);
+      const hexCenter = hexGridRef.current.hexToPixel(hexCoord.q, hexCoord.r);
+      x = hexCenter.x;
+      y = hexCenter.y;
+    }
     
     const isSelected = selectedCity === city.id;
     const isHovered = hoveredCity === city.id;
