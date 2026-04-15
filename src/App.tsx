@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { MainMenu } from './components/UI/MainMenu';
 import { CityInfo } from './components/UI/CityInfo';
 import { GameMap } from './components/Map/GameMap';
+import { PoliticsPanel } from './components/UI/PoliticsPanel';
 import { useGameStore } from './store';
 import type { City, Faction, General } from './types';
 import citiesData from './data/cities/yellow_turban.json';
@@ -12,15 +13,20 @@ function App() {
   const [gameState, setGameState] = useState<'menu' | 'playing'>('menu');
   const [showGeneralsModal, setShowGeneralsModal] = useState(false);
   const [showCitiesModal, setShowCitiesModal] = useState(false);
+  const [showPoliticsPanel, setShowPoliticsPanel] = useState(false);
   const { 
     turn, 
-    season, 
+    season,
+    weather,
     factions, 
     cities, 
     generals,
     currentPlayer,
     loadGame,
-    nextTurn 
+    nextTurn,
+    randomWeather,
+    updateCity,
+    updateFaction
   } = useGameStore();
 
   // 加载游戏数据
@@ -85,8 +91,83 @@ function App() {
   };
 
   const handleNextTurn = () => {
+    // 计算资源产出
+    const seasonMultiplier: Record<string, number> = {
+      spring: 1.0,
+      summer: 1.2,
+      autumn: 1.5,
+      winter: 0.8
+    };
+    const mult = seasonMultiplier[season] || 1.0;
+
+    // 计算每个城市的产出并更新
+    Object.values(cities).forEach(city => {
+      if (!city || !city.faction) return;
+      
+      // 金钱产出 = 人口 × (商业度/100) × (市场等级 × 0.1) × 季节系数
+      const moneyIncome = Math.floor(
+        city.stats.population * 0.001 * 
+        (city.stats.commerce / 100) * 
+        (1 + city.facilities.market * 0.1) * 
+        mult
+      );
+      
+      // 粮草产出 = 人口 × (开发度/100) × (农场等级 × 0.1) × 季节系数
+      const foodIncome = Math.floor(
+        city.stats.population * 0.002 * 
+        (city.stats.development / 100) * 
+        (1 + city.facilities.farm * 0.1) * 
+        mult
+      );
+      
+      // 兵员产出 = 人口 × 0.001 × (兵营等级 × 0.1)
+      const soldierIncome = Math.floor(
+        city.stats.population * 0.0001 * 
+        (1 + city.facilities.barracks * 0.1)
+      );
+
+      // 更新城市资源
+      updateCity(city.id, {
+        resources: {
+          money: city.resources.money + moneyIncome,
+          food: city.resources.food + foodIncome,
+          soldiers: city.resources.soldiers + soldierIncome
+        }
+      });
+    });
+
+    // 更新势力总资源
+    Object.values(factions).forEach(faction => {
+      if (!faction) return;
+      
+      let totalMoney = 0;
+      let totalFood = 0;
+      let totalSoldiers = 0;
+      
+      faction.cities.forEach(cityId => {
+        const city = cities[cityId];
+        if (city) {
+          totalMoney += city.resources.money;
+          totalFood += city.resources.food;
+          totalSoldiers += city.resources.soldiers;
+        }
+      });
+      
+      updateFaction(faction.id, {
+        resources: {
+          money: totalMoney,
+          food: totalFood,
+          soldiers: totalSoldiers
+        }
+      });
+    });
+
+    // 推进回合
     nextTurn();
-    console.log(`回合 ${turn} -> ${turn + 1}`);
+    // 随机天气
+    randomWeather();
+    
+    console.log(`回合 ${turn} -> ${turn + 1}, 季节: ${season}, 天气: ${weather}`);
   };
 
   const getSeasonText = (season: string) => {
@@ -97,6 +178,26 @@ function App() {
       winter: '冬'
     };
     return seasonMap[season as keyof typeof seasonMap] || '春';
+  };
+
+  const getWeatherText = (weather: string) => {
+    const weatherMap = {
+      sunny: '晴',
+      cloudy: '阴',
+      rain: '雨',
+      snow: '雪'
+    };
+    return weatherMap[weather as keyof typeof weatherMap] || '晴';
+  };
+
+  const getWeatherIcon = (weather: string) => {
+    const icons = {
+      sunny: '☀️',
+      cloudy: '☁️',
+      rain: '🌧️',
+      snow: '❄️'
+    };
+    return icons[weather as keyof typeof icons] || '☀️';
   };
 
   const currentPlayerFaction = factions[currentPlayer];
@@ -129,6 +230,9 @@ function App() {
                 </span>
                 <span className="text-sm bg-stone-800/80 px-3 py-1 rounded border border-amber-700/30">
                   季节: {getSeasonText(season)}
+                </span>
+                <span className="text-sm bg-stone-800/80 px-3 py-1 rounded border border-amber-700/30">
+                  {getWeatherIcon(weather)} {getWeatherText(weather)}
                 </span>
                 <button
                   onClick={handleNextTurn}
@@ -275,7 +379,9 @@ function App() {
           {/* 底部悬浮导航栏 */}
           <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-amber-950/95 via-stone-900/95 to-amber-950/95 border-t-2 border-amber-800/50 backdrop-blur-md shadow-2xl z-50">
             <div className="py-3 px-6 flex items-center justify-center space-x-3">
-              <button className="bg-gradient-to-br from-blue-900/80 to-blue-800/80 hover:from-blue-800/90 hover:to-blue-700/90 px-6 py-2.5 rounded-lg text-sm font-medium transition-all shadow-lg border border-blue-600/40 flex items-center space-x-2" style={{ fontFamily: '"STKaiti", "KaiTi", serif' }}>
+              <button 
+                onClick={() => setShowPoliticsPanel(true)}
+                className="bg-gradient-to-br from-blue-900/80 to-blue-800/80 hover:from-blue-800/90 hover:to-blue-700/90 px-6 py-2.5 rounded-lg text-sm font-medium transition-all shadow-lg border border-blue-600/40 flex items-center space-x-2" style={{ fontFamily: '"STKaiti", "KaiTi", serif' }}>
                 <span>🏛️</span>
                 <span>内政</span>
               </button>
@@ -376,6 +482,11 @@ function App() {
                 </div>
               </div>
             </div>
+          )}
+
+          {/* 内政面板 */}
+          {showPoliticsPanel && (
+            <PoliticsPanel onClose={() => setShowPoliticsPanel(false)} />
           )}
         </div>
       )}
