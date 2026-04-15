@@ -1,10 +1,15 @@
 import { create } from 'zustand';
-import { GameState, Faction, City, General, Item, Army, Weather, Title, GeneralRelation } from '@/types';
+import { GameState, Faction, City, General, Item, Army, Weather, Title, GeneralRelation, Battle, Captive, Formation, Tactics, Stratagem } from '@/types';
 
 interface GameStore extends GameState {
   // 官职和关系数据
   titles: Record<string, Title>;
   relations: GeneralRelation[];
+  
+  // 阵型、战术、计谋数据
+  formations: Record<string, Formation>;
+  tactics: Record<string, Tactics>;
+  stratagems: Record<string, Stratagem>;
   
   // 游戏流程
   nextTurn: () => void;
@@ -26,6 +31,8 @@ interface GameStore extends GameState {
   
   // 军队操作
   updateArmy: (armyId: string, updates: Partial<Army>) => void;
+  createArmy: (army: Army) => void;
+  deleteArmy: (armyId: string) => void;
   
   // 官职操作
   setTitles: (titles: Record<string, Title>) => void;
@@ -33,6 +40,19 @@ interface GameStore extends GameState {
   // 关系操作
   setRelations: (relations: GeneralRelation[]) => void;
   getGeneralRelations: (generalId: string) => GeneralRelation[];
+  
+  // 战斗操作
+  setFormations: (formations: Record<string, Formation>) => void;
+  setTactics: (tactics: Record<string, Tactics>) => void;
+  setStratagems: (stratagems: Record<string, Stratagem>) => void;
+  createBattle: (battle: Battle) => void;
+  updateBattle: (battleId: string, updates: Partial<Battle>) => void;
+  
+  // 俘虏操作
+  addCaptive: (captive: Captive) => void;
+  updateCaptive: (generalId: string, updates: Partial<Captive>) => void;
+  removeCaptive: (generalId: string) => void;
+  getFactionCaptives: (factionId: string) => Captive[];
 
   // 游戏状态
   loadGame: (gameState: GameState) => void;
@@ -49,6 +69,8 @@ const initialGameState: GameState = {
   generals: {},
   items: {},
   armies: {},
+  battles: {},
+  captives: [],
   currentPlayer: '',
 };
 
@@ -56,6 +78,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
   ...initialGameState,
   titles: {},
   relations: [],
+  formations: {},
+  tactics: {},
+  stratagems: {},
   
   // 游戏流程
   nextTurn: () => set((state) => {
@@ -129,6 +154,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
     },
   })),
   
+  createArmy: (army) => set((state) => ({
+    armies: {
+      ...state.armies,
+      [army.id]: army,
+    },
+  })),
+  
+  deleteArmy: (armyId) => set((state) => {
+    const { [armyId]: _, ...remaining } = state.armies;
+    return { armies: remaining };
+  }),
+  
   // 官职操作
   setTitles: (titles) => set({ titles }),
   
@@ -140,6 +177,45 @@ export const useGameStore = create<GameStore>((set, get) => ({
     return state.relations.filter(
       r => r.general1 === generalId || r.general2 === generalId
     );
+  },
+  
+  // 战斗操作
+  setFormations: (formations) => set({ formations }),
+  setTactics: (tactics) => set({ tactics }),
+  setStratagems: (stratagems) => set({ stratagems }),
+  
+  createBattle: (battle) => set((state) => ({
+    battles: {
+      ...state.battles,
+      [battle.id]: battle,
+    },
+  })),
+  
+  updateBattle: (battleId, updates) => set((state) => ({
+    battles: {
+      ...state.battles,
+      [battleId]: { ...state.battles[battleId], ...updates },
+    },
+  })),
+  
+  // 俘虏操作
+  addCaptive: (captive) => set((state) => ({
+    captives: [...state.captives, captive],
+  })),
+  
+  updateCaptive: (generalId, updates) => set((state) => ({
+    captives: state.captives.map(c => 
+      c.generalId === generalId ? { ...c, ...updates } : c
+    ),
+  })),
+  
+  removeCaptive: (generalId) => set((state) => ({
+    captives: state.captives.filter(c => c.generalId !== generalId),
+  })),
+  
+  getFactionCaptives: (factionId) => {
+    const state = get();
+    return state.captives.filter(c => c.capturedBy === factionId);
   },
 
   // 游戏状态

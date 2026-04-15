@@ -1,0 +1,70 @@
+[
+  {
+    "id": "alienate",
+    "name": "离间",
+    "target": "general",
+    "effect": {
+      "loyaltyChange": -15
+    },
+    "successRate": 50,
+    "requirements": {
+      "minIntelligence": 70,
+      "targetLoyalty": 80
+    },
+    "description": "降低敌方武将忠诚度15点"
+  },
+  {
+    "id": "false_report",
+    "name": "伪报",
+    "target": "army",
+    "effect": {
+      "retreat": true
+    },
+    "successRate": 40,
+    "requirements": {
+      "minIntelligence": 75
+    },
+    "description": "使敌人撤退"
+  },
+  {
+    "id": "confuse",
+    "name": "混乱",
+    "target": "army",
+    "effect": {
+      "moraleChange": -20,
+      "confuse": true
+    },
+    "successRate": 45,
+    "requirements": {
+      "minIntelligence": 65
+    },
+    "description": "使敌人混乱，降低攻击和防御，士气-20"
+  },
+  {
+    "id": "persuade",
+    "name": "劝降",
+    "target": "general",
+    "effect": {
+      "loyaltyChange": -25
+    },
+    "successRate": 35,
+    "requirements": {
+      "minIntelligence": 80,
+      "targetLoyalty": 50
+    },
+    "description": "劝说敌方武将投降，忠诚度-25"
+  },
+  {
+    "id": "incite",
+    "name": "煽动",
+    "target": "army",
+    "effect": {
+      "moraleChange": -30
+    },
+    "successRate": 40,
+    "requirements": {
+      "minIntelligence": 70
+    },
+    "description": "煽动敌军士气下降30点"
+  }
+]

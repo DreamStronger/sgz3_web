@@ -158,6 +158,124 @@ export interface Item {
 // 天气类型
 export type Weather = 'sunny' | 'cloudy' | 'rain' | 'snow';
 
+// 阵型类型
+export type FormationType = 'fish_scale' | 'arrow' | 'goose' | 'circle' | 'snake' | 'crane';
+
+// 阵型数据模型
+export interface Formation {
+  id: FormationType;
+  name: string;
+  attackBonus: number;       // 攻击加成（百分比）
+  defenseBonus: number;      // 防御加成（百分比）
+  mobilityBonus: number;     // 移动加成（百分比）
+  description: string;
+}
+
+// 战斗类型
+export type BattleType = 'field' | 'siege' | 'water';
+
+// 战斗数据模型
+export interface Battle {
+  id: string;
+  type: BattleType;
+  attacker: {
+    faction: string;
+    generals: string[];
+    units: Unit[];
+    formation: FormationType;
+  };
+  defender: {
+    faction: string;
+    generals: string[];
+    units: Unit[];
+    formation: FormationType;
+  };
+  location: string;           // 战斗地点（城市ID或位置）
+  terrain: string;
+  weather: Weather;
+  tactics: string[];          // 使用的战术
+  stratagems: string[];       // 使用的计谋
+  turn: number;               // 战斗回合数
+  status: 'ongoing' | 'attacker_win' | 'defender_win' | 'draw';
+  result?: {
+    winner: string;
+    casualties: { attacker: number; defender: number };
+    captives: string[];       // 俘虏武将
+    items: string[];          // 缴获宝物
+    experience: { attacker: number; defender: number };
+  };
+}
+
+// 单挑数据模型
+export interface Duel {
+  id: string;
+  battle: string;             // 所属战斗ID
+  attacker: string;           // 发起方武将ID
+  defender: string;           // 应战方武将ID
+  turn: number;               // 单挑回合数
+  attackerHP: number;         // 发起方生命值
+  defenderHP: number;         // 应战方生命值
+  status: 'ongoing' | 'attacker_win' | 'defender_win' | 'draw' | 'rejected';
+  result?: {
+    winner: string;
+    loser: string;
+    loserCaptured: boolean;   // 失败方是否被俘
+    moraleEffect: { attacker: number; defender: number };
+  };
+}
+
+// 俘虏数据模型
+export interface Captive {
+  generalId: string;          // 被俘武将ID
+  capturedBy: string;         // 俘虏方势力ID
+  capturedAt: string;         // 被俘城市ID
+  capturedTurn: number;       // 被俘回合
+  status: 'imprisoned' | 'persuading' | 'ransom' | 'released' | 'executed';
+  persuasionAttempts: number; // 招降尝试次数
+  loyaltyDrop: number;        // 忠诚度下降值
+}
+
+// 战术类型
+export type TacticsType = 'ambush' | 'fire_attack' | 'water_attack' | 'surprise_attack' | 'raid';
+
+// 战术数据模型
+export interface Tactics {
+  id: TacticsType;
+  name: string;
+  type: 'offensive' | 'defensive';
+  damageBonus: number;       // 伤害加成
+  successRate: number;       // 基础成功率
+  requirements: {
+    terrain?: string[];      // 需要的地形
+    weather?: Weather[];    // 需要的天气
+    minIntelligence?: number; // 最低智力要求
+  };
+  cooldown: number;          // 冷却回合数
+  description: string;
+}
+
+// 计谋类型
+export type StratagemType = 'alienate' | 'false_report' | 'confuse' | 'persuade' | 'incite';
+
+// 计谋数据模型
+export interface Stratagem {
+  id: StratagemType;
+  name: string;
+  target: 'general' | 'army' | 'city';
+  effect: {
+    loyaltyChange?: number;   // 忠诚度变化
+    moraleChange?: number;    // 士气变化
+    confuse?: boolean;        // 是否造成混乱
+    retreat?: boolean;        // 是否强制撤退
+  };
+  successRate: number;       // 基础成功率
+  requirements: {
+    minIntelligence: number;  // 最低智力要求
+    targetLoyalty?: number;   // 目标忠诚度要求
+  };
+  description: string;
+}
+
 // 游戏状态
 export interface GameState {
   turn: number;              // 当前回合
@@ -169,5 +287,7 @@ export interface GameState {
   generals: Record<string, General>;
   items: Record<string, Item>;
   armies: Record<string, Army>;
+  battles: Record<string, Battle>;      // 战斗记录
+  captives: Captive[];                   // 俘虏列表
   currentPlayer: string;     // 当前玩家势力ID
 }

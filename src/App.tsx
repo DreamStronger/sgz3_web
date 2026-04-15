@@ -4,13 +4,17 @@ import { CityInfo } from './components/UI/CityInfo';
 import { GameMap } from './components/Map/GameMap';
 import { PoliticsPanel } from './components/UI/PoliticsPanel';
 import { GeneralPanel } from './components/UI/GeneralPanel';
+import { ArmyPanel } from './components/UI/ArmyPanel';
 import { useGameStore } from './store';
-import type { City, Faction, General, Title, GeneralRelation } from './types';
+import type { City, Faction, General, Title, GeneralRelation, Formation, Tactics, Stratagem } from './types';
 import citiesData from './data/cities/yellow_turban.json';
 import generalsData from './data/generals/yellow_turban.json';
 import factionsData from './data/factions.json';
 import titlesData from './data/titles.json';
 import relationsData from './data/relations/yellow_turban.json';
+import formationsData from './data/formations.json';
+import tacticsData from './data/tactics.json';
+import stratagemsData from './data/stratagems.json';
 
 function App() {
   const [gameState, setGameState] = useState<'menu' | 'playing'>('menu');
@@ -18,6 +22,7 @@ function App() {
   const [showCitiesModal, setShowCitiesModal] = useState(false);
   const [showPoliticsPanel, setShowPoliticsPanel] = useState(false);
   const [showGeneralPanel, setShowGeneralPanel] = useState(false);
+  const [showArmyPanel, setShowArmyPanel] = useState(false);
   const { 
     turn, 
     season,
@@ -33,7 +38,10 @@ function App() {
     updateFaction,
     updateGeneral,
     setTitles,
-    setRelations
+    setRelations,
+    setFormations,
+    setTactics,
+    setStratagems
   } = useGameStore();
 
   // 加载游戏数据
@@ -78,6 +86,27 @@ function App() {
       // 加载关系数据
       setRelations(relationsData as GeneralRelation[]);
 
+      // 加载阵型数据
+      const formationsRecord: Record<string, Formation> = {};
+      (formationsData as Formation[]).forEach(formation => {
+        formationsRecord[formation.id] = formation;
+      });
+      setFormations(formationsRecord);
+
+      // 加载战术数据
+      const tacticsRecord: Record<string, Tactics> = {};
+      (tacticsData as Tactics[]).forEach(tactics => {
+        tacticsRecord[tactics.id] = tactics;
+      });
+      setTactics(tacticsRecord);
+
+      // 加载计谋数据
+      const stratagemsRecord: Record<string, Stratagem> = {};
+      (stratagemsData as Stratagem[]).forEach(stratagem => {
+        stratagemsRecord[stratagem.id] = stratagem;
+      });
+      setStratagems(stratagemsRecord);
+
       loadGame({
         turn: 1,
         season: 'spring',
@@ -87,10 +116,12 @@ function App() {
         generals: generalsRecord,
         items: {},
         armies: {},
+        battles: {},
+        captives: [],
         currentPlayer: 'han'
       });
     }
-  }, [gameState, loadGame, setTitles, setRelations]);
+  }, [gameState, loadGame, setTitles, setRelations, setFormations, setTactics, setStratagems]);
 
   const handleStartGame = () => {
     console.log('开始游戏');
@@ -437,7 +468,9 @@ function App() {
                 <span>🏛️</span>
                 <span>内政</span>
               </button>
-              <button className="bg-gradient-to-br from-red-900/80 to-red-800/80 hover:from-red-800/90 hover:to-red-700/90 px-6 py-2.5 rounded-lg text-sm font-medium transition-all shadow-lg border border-red-600/40 flex items-center space-x-2" style={{ fontFamily: '"STKaiti", "KaiTi", serif' }}>
+              <button 
+                onClick={() => setShowArmyPanel(true)}
+                className="bg-gradient-to-br from-red-900/80 to-red-800/80 hover:from-red-800/90 hover:to-red-700/90 px-6 py-2.5 rounded-lg text-sm font-medium transition-all shadow-lg border border-red-600/40 flex items-center space-x-2" style={{ fontFamily: '"STKaiti", "KaiTi", serif' }}>
                 <span>⚔️</span>
                 <span>军事</span>
               </button>
@@ -546,6 +579,11 @@ function App() {
           {/* 武将面板 */}
           {showGeneralPanel && (
             <GeneralPanel onClose={() => setShowGeneralPanel(false)} />
+          )}
+
+          {/* 军队面板 */}
+          {showArmyPanel && (
+            <ArmyPanel onClose={() => setShowArmyPanel(false)} />
           )}
         </div>
       )}

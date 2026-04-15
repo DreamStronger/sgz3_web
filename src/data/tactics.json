@@ -1,0 +1,65 @@
+[
+  {
+    "id": "ambush",
+    "name": "埋伏",
+    "type": "offensive",
+    "damageBonus": 50,
+    "successRate": 60,
+    "requirements": {
+      "terrain": ["mountain", "forest", "pass"],
+      "minIntelligence": 60
+    },
+    "cooldown": 3,
+    "description": "在特定地形隐藏，突袭敌人，伤害+50%"
+  },
+  {
+    "id": "fire_attack",
+    "name": "火攻",
+    "type": "offensive",
+    "damageBonus": 80,
+    "successRate": 50,
+    "requirements": {
+      "weather": ["sunny", "cloudy"],
+      "minIntelligence": 70
+    },
+    "cooldown": 5,
+    "description": "对敌人造成持续伤害，伤害+80%"
+  },
+  {
+    "id": "water_attack",
+    "name": "水攻",
+    "type": "offensive",
+    "damageBonus": 100,
+    "successRate": 40,
+    "requirements": {
+      "terrain": ["water"],
+      "minIntelligence": 75
+    },
+    "cooldown": 5,
+    "description": "在水域战斗时攻击+100%"
+  },
+  {
+    "id": "surprise_attack",
+    "name": "奇袭",
+    "type": "offensive",
+    "damageBonus": 60,
+    "successRate": 55,
+    "requirements": {
+      "minIntelligence": 65
+    },
+    "cooldown": 4,
+    "description": "无视防御直接攻击，伤害+60%"
+  },
+  {
+    "id": "raid",
+    "name": "突袭",
+    "type": "offensive",
+    "damageBonus": 40,
+    "successRate": 70,
+    "requirements": {
+      "minIntelligence": 50
+    },
+    "cooldown": 2,
+    "description": "快速突袭敌人，伤害+40%"
+  }
+]

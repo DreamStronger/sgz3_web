@@ -1,0 +1,50 @@
+[
+  {
+    "id": "fish_scale",
+    "name": "鱼鳞阵",
+    "attackBonus": -10,
+    "defenseBonus": 30,
+    "mobilityBonus": 0,
+    "description": "防御型阵型，防御+30%，攻击-10%"
+  },
+  {
+    "id": "arrow",
+    "name": "锋矢阵",
+    "attackBonus": 30,
+    "defenseBonus": -10,
+    "mobilityBonus": 0,
+    "description": "攻击型阵型，攻击+30%，防御-10%"
+  },
+  {
+    "id": "goose",
+    "name": "雁行阵",
+    "attackBonus": 0,
+    "defenseBonus": 0,
+    "mobilityBonus": 0,
+    "description": "平衡型阵型，攻防平衡"
+  },
+  {
+    "id": "circle",
+    "name": "方圆阵",
+    "attackBonus": 20,
+    "defenseBonus": 0,
+    "mobilityBonus": 0,
+    "description": "包围型阵型，对侧翼敌人攻击+20%"
+  },
+  {
+    "id": "snake",
+    "name": "长蛇阵",
+    "attackBonus": 0,
+    "defenseBonus": 0,
+    "mobilityBonus": 50,
+    "description": "机动型阵型，移动速度+50%"
+  },
+  {
+    "id": "crane",
+    "name": "衡轭阵",
+    "attackBonus": 15,
+    "defenseBonus": 15,
+    "mobilityBonus": 0,
+    "description": "攻防兼备，攻防各+15%"
+  }
+]
