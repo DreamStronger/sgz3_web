@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import { GameState, Faction, City, General, Item, Army, Weather, Title, GeneralRelation, Battle, Captive, Formation, Tactics, Stratagem, ArmyMovement } from '@/types';
+import { RelationSystem } from '@/systems/relation/RelationSystem';
+import { SearchSystem, SearchResult } from '@/systems/search/SearchSystem';
 
 interface GameStore extends GameState {
   // 官职和关系数据
@@ -56,6 +58,9 @@ interface GameStore extends GameState {
   updateCaptive: (generalId: string, updates: Partial<Captive>) => void;
   removeCaptive: (generalId: string) => void;
   getFactionCaptives: (factionId: string) => Captive[];
+
+  // 搜索操作
+  executeSearch: (generalId: string, cityId: string) => SearchResult;
 
   // 游戏状态
   loadGame: (gameState: GameState) => void;
@@ -138,10 +143,89 @@ export const useGameStore = create<GameStore>((set, get) => ({
       }
     });
     
+    // 处理武将忠诚度变化和叛变判定
+    const updatedGenerals = { ...state.generals };
+    const updatedFactions = { ...state.factions };
+    const defectedGenerals: Array<{ general: General; targetFaction?: string; reason: string }> = [];
+    
+    Object.entries(updatedGenerals).forEach(([generalId, general]) => {
+      if (general.faction === '' || general.status !== 'active') return;
+      
+      const faction = updatedFactions[general.faction];
+      if (!faction) return;
+      
+      // 计算忠诚度变化
+      const loyaltyChange = RelationSystem.calculateLoyaltyChange(
+        general,
+        updatedGenerals,
+        state.relations,
+        faction,
+        state.cities
+      );
+      
+      const newLoyalty = Math.max(0, Math.min(100, general.loyalty + loyaltyChange));
+      updatedGenerals[generalId] = {
+        ...general,
+        loyalty: newLoyalty,
+      };
+      
+      // 判定叛变
+      const defectResult = RelationSystem.shouldDefect(
+        updatedGenerals[generalId],
+        updatedGenerals,
+        state.relations,
+        updatedFactions
+      );
+      
+      if (defectResult.shouldDefect) {
+        defectedGenerals.push({
+          general: updatedGenerals[generalId],
+          targetFaction: defectResult.targetFaction,
+          reason: defectResult.reason,
+        });
+      }
+    });
+    
+    // 处理叛变
+    defectedGenerals.forEach(({ general, targetFaction, reason }) => {
+      // 从原势力移除
+      const oldFaction = updatedFactions[general.faction];
+      if (oldFaction) {
+        updatedFactions[general.faction] = {
+          ...oldFaction,
+          generals: oldFaction.generals.filter(id => id !== general.id),
+        };
+      }
+      
+      // 加入新势力
+      if (targetFaction && updatedFactions[targetFaction]) {
+        updatedFactions[targetFaction] = {
+          ...updatedFactions[targetFaction],
+          generals: [...updatedFactions[targetFaction].generals, general.id],
+        };
+        updatedGenerals[general.id] = {
+          ...general,
+          faction: targetFaction,
+          loyalty: 50, // 叛变后忠诚度重置为50
+        };
+      } else {
+        // 无目标势力，成为在野武将
+        updatedGenerals[general.id] = {
+          ...general,
+          faction: '',
+          loyalty: 50,
+        };
+      }
+      
+      console.log(`武将${general.name}叛变：${reason}`);
+    });
+    
     return { 
       turn: newTurn, 
       season: newSeason,
       armies: updatedArmies,
+      generals: updatedGenerals,
+      factions: updatedFactions,
     };
   }),
   
@@ -397,6 +481,88 @@ export const useGameStore = create<GameStore>((set, get) => ({
   getFactionCaptives: (factionId) => {
     const state = get();
     return state.captives.filter(c => c.capturedBy === factionId);
+  },
+
+  // 搜索操作
+  executeSearch: (generalId, cityId) => {
+    const state = get();
+    const general = state.generals[generalId];
+    const city = state.cities[cityId];
+    
+    if (!general || !city) {
+      return {
+        type: 'nothing' as const,
+        message: '武将或城市不存在'
+      };
+    }
+    
+    // 检查是否可以搜索
+    const faction = state.factions[general.faction];
+    if (!faction) {
+      return {
+        type: 'nothing' as const,
+        message: '武将不属于任何势力'
+      };
+    }
+    
+    const canSearch = SearchSystem.canSearch(general, city, faction.resources.money);
+    if (!canSearch.canSearch) {
+      return {
+        type: 'nothing' as const,
+        message: canSearch.reason || '无法执行搜索'
+      };
+    }
+    
+    // 执行搜索
+    const result = SearchSystem.executeSearch(
+      general,
+      city,
+      state.items,
+      state.generals,
+      state.weather
+    );
+    
+    // 扣除金钱
+    const cost = SearchSystem.calculateSearchCost(general, city);
+    set((state) => ({
+      factions: {
+        ...state.factions,
+        [faction.id]: {
+          ...faction,
+          resources: {
+            ...faction.resources,
+            money: faction.resources.money - cost.money,
+          },
+        },
+      },
+    }));
+    
+    // 处理搜索结果
+    if (result.type === 'item' && result.itemId) {
+      // 发现宝物，更新宝物位置
+      set((state) => ({
+        items: {
+          ...state.items,
+          [result.itemId!]: {
+            ...state.items[result.itemId!],
+            location: cityId,
+          },
+        },
+      }));
+    } else if (result.type === 'general' && result.generalId) {
+      // 发现人才，设置忠诚度较低
+      set((state) => ({
+        generals: {
+          ...state.generals,
+          [result.generalId!]: {
+            ...state.generals[result.generalId!],
+            loyalty: 30, // 新发现的人才忠诚度较低
+          },
+        },
+      }));
+    }
+    
+    return result;
   },
 
   // 游戏状态

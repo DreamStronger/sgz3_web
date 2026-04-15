@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useGameStore } from '@/store';
 import { useDialogStore } from '@/store/dialogStore';
+import { GeneralRelationPanel } from './GeneralRelationPanel';
 import type { General, Title, Item } from '@/types';
 
 interface GeneralPanelProps {
@@ -31,6 +32,7 @@ export function GeneralPanel({ onClose }: GeneralPanelProps) {
   const [filterLocation, setFilterLocation] = useState<string>('all');
   const [showTitleModal, setShowTitleModal] = useState(false);
   const [showItemModal, setShowItemModal] = useState(false);
+  const [showRelationPanel, setShowRelationPanel] = useState(false);
   
   // 获取玩家武将
   const playerFaction = factions[currentPlayer];
@@ -541,6 +543,12 @@ export function GeneralPanel({ onClose }: GeneralPanelProps) {
                   >
                     封官
                   </button>
+                  <button
+                    onClick={() => setShowRelationPanel(true)}
+                    className="flex-1 px-4 py-2 bg-cyan-700/60 hover:bg-cyan-600/60 rounded text-sm font-medium transition-colors border border-cyan-500/30"
+                  >
+                    关系
+                  </button>
                 </div>
               </div>
             ) : (
@@ -655,6 +663,14 @@ export function GeneralPanel({ onClose }: GeneralPanelProps) {
             </div>
           </div>
         </div>
+      )}
+      
+      {/* 武将关系面板 */}
+      {showRelationPanel && selectedGeneral && (
+        <GeneralRelationPanel
+          generalId={selectedGeneral.id}
+          onClose={() => setShowRelationPanel(false)}
+        />
       )}
     </div>
   );

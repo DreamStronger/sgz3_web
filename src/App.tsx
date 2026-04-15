@@ -90,7 +90,7 @@ function App() {
       setTitles(titlesRecord);
 
       // 加载关系数据
-      setRelations(relationsData as GeneralRelation[]);
+      setRelations((relationsData as { relations: GeneralRelation[] }).relations);
 
       // 加载阵型数据
       const formationsRecord: Record<string, Formation> = {};

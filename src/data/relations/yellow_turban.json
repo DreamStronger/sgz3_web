@@ -1,93 +1,25 @@
-[
-  {
-    "general1": "liubei",
-    "general2": "guanyu",
-    "type": "brother",
-    "intimacy": 100,
-    "history": "桃园三结义，义兄弟"
-  },
-  {
-    "general1": "liubei",
-    "general2": "zhangfei",
-    "type": "brother",
-    "intimacy": 100,
-    "history": "桃园三结义，义兄弟"
-  },
-  {
-    "general1": "guanyu",
-    "general2": "zhangfei",
-    "type": "brother",
-    "intimacy": 95,
-    "history": "桃园三结义，义兄弟"
-  },
-  {
-    "general1": "sunjian",
-    "general2": "sunce",
-    "type": "father",
-    "intimacy": 100,
-    "history": "父子关系"
-  },
-  {
-    "general1": "sunce",
-    "general2": "zhouyu",
-    "type": "friend",
-    "intimacy": 90,
-    "history": "总角之交，生死之交"
-  },
-  {
-    "general1": "caocao",
-    "general2": "guanyu",
-    "type": "former_lord",
-    "intimacy": 30,
-    "history": "关羽曾降曹操，后离去"
-  },
-  {
-    "general1": "lvbu",
-    "general2": "dongzhuo",
-    "type": "former_lord",
-    "intimacy": -50,
-    "history": "吕布曾认董卓为义父，后杀之"
-  },
-  {
-    "general1": "zhangjiao",
-    "general2": "zhangbao",
-    "type": "brother",
-    "intimacy": 90,
-    "history": "黄巾三兄弟"
-  },
-  {
-    "general1": "zhangjiao",
-    "general2": "zhangliang",
-    "type": "brother",
-    "intimacy": 90,
-    "history": "黄巾三兄弟"
-  },
-  {
-    "general1": "zhangbao",
-    "general2": "zhangliang",
-    "type": "brother",
-    "intimacy": 85,
-    "history": "黄巾三兄弟"
-  },
-  {
-    "general1": "yuan_shao",
-    "general2": "wenchou",
-    "type": "friend",
-    "intimacy": 70,
-    "history": "主从关系，信任有加"
-  },
-  {
-    "general1": "yuan_shao",
-    "general2": "yanliang",
-    "type": "friend",
-    "intimacy": 70,
-    "history": "主从关系，信任有加"
-  },
-  {
-    "general1": "wenchou",
-    "general2": "yanliang",
-    "type": "friend",
-    "intimacy": 80,
-    "history": "同为袁绍大将，并肩作战"
-  }
-]
+{
+  "relations": [
+    {
+      "general1": "zhang_jiao",
+      "general2": "zhang_bao",
+      "type": "father",
+      "intimacy": 100,
+      "history": "张角与张宝为父子关系"
+    },
+    {
+      "general1": "zhang_jiao",
+      "general2": "zhang_liang",
+      "type": "father",
+      "intimacy": 100,
+      "history": "张角与张梁为父子关系"
+    },
+    {
+      "general1": "zhang_bao",
+      "general2": "zhang_liang",
+      "type": "brother",
+      "intimacy": 90,
+      "history": "张宝与张梁为兄弟关系"
+    }
+  ]
+}

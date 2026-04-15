@@ -1,9 +1,12 @@
+import { useState } from 'react';
 import { useGameStore, useMapStore } from '@/store';
+import { SearchPanel } from './SearchPanel';
 import type { City, General } from '@/types';
 
 export function CityInfo() {
   const { selectedCity, setSelectedCity } = useMapStore();
-  const { cities, generals, factions } = useGameStore();
+  const { cities, generals, factions, currentPlayer } = useGameStore();
+  const [showSearchPanel, setShowSearchPanel] = useState(false);
 
   if (!selectedCity) {
     return (
@@ -173,7 +176,28 @@ export function CityInfo() {
             </div>
           </div>
         )}
+        
+        {/* 搜索按钮 */}
+        {city.faction === currentPlayer && cityGenerals.length > 0 && (
+          <div className="border-t border-amber-800/30 pt-3">
+            <button
+              onClick={() => setShowSearchPanel(true)}
+              className="w-full bg-gradient-to-br from-purple-700 to-purple-800 hover:from-purple-600 hover:to-purple-700 text-purple-100 py-2 rounded-lg text-sm font-medium transition-all border border-purple-500/40"
+              style={{ fontFamily: '"STKaiti", "KaiTi", serif' }}
+            >
+              🔍 执行搜索
+            </button>
+          </div>
+        )}
       </div>
+      
+      {/* 搜索面板 */}
+      {showSearchPanel && (
+        <SearchPanel
+          cityId={city.id}
+          onClose={() => setShowSearchPanel(false)}
+        />
+      )}
     </div>
   );
 }

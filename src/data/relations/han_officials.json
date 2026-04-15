@@ -1,0 +1,116 @@
+{
+  "relations": [
+    {
+      "general1": "he_jin",
+      "general2": "he_miao",
+      "type": "brother",
+      "intimacy": 80,
+      "history": "何进与何苗为兄弟关系"
+    },
+    {
+      "general1": "yuan_shao",
+      "general2": "yuan_shu",
+      "type": "brother",
+      "intimacy": 60,
+      "history": "袁绍与袁术为同父异母兄弟，但关系不睦"
+    },
+    {
+      "general1": "cao_cao",
+      "general2": "xiahou_dun",
+      "type": "friend",
+      "intimacy": 85,
+      "history": "曹操与夏侯惇为至交好友，共同起兵"
+    },
+    {
+      "general1": "cao_cao",
+      "general2": "xiahou_yuan",
+      "type": "friend",
+      "intimacy": 80,
+      "history": "曹操与夏侯渊为好友，共同征战"
+    },
+    {
+      "general1": "cao_cao",
+      "general2": "cao_ren",
+      "type": "brother",
+      "intimacy": 75,
+      "history": "曹操与曹仁为堂兄弟"
+    },
+    {
+      "general1": "cao_cao",
+      "general2": "cao_hong",
+      "type": "brother",
+      "intimacy": 70,
+      "history": "曹操与曹洪为堂兄弟"
+    },
+    {
+      "general1": "sun_jian",
+      "general2": "sun_ce",
+      "type": "father",
+      "intimacy": 100,
+      "history": "孙坚与孙策为父子关系"
+    },
+    {
+      "general1": "sun_jian",
+      "general2": "sun_quan",
+      "type": "father",
+      "intimacy": 100,
+      "history": "孙坚与孙权为父子关系"
+    },
+    {
+      "general1": "sun_ce",
+      "general2": "sun_quan",
+      "type": "brother",
+      "intimacy": 95,
+      "history": "孙策与孙权为兄弟关系"
+    },
+    {
+      "general1": "sun_ce",
+      "general2": "zhou_yu",
+      "type": "friend",
+      "intimacy": 95,
+      "history": "孙策与周瑜为至交好友，义兄弟"
+    },
+    {
+      "general1": "liu_bei",
+      "general2": "guan_yu",
+      "type": "brother",
+      "intimacy": 100,
+      "history": "刘备与关羽为义兄弟，桃园结义"
+    },
+    {
+      "general1": "liu_bei",
+      "general2": "zhang_fei",
+      "type": "brother",
+      "intimacy": 100,
+      "history": "刘备与张飞为义兄弟，桃园结义"
+    },
+    {
+      "general1": "guan_yu",
+      "general2": "zhang_fei",
+      "type": "brother",
+      "intimacy": 95,
+      "history": "关羽与张飞为义兄弟，桃园结义"
+    },
+    {
+      "general1": "liu_bei",
+      "general2": "zhao_yun",
+      "type": "friend",
+      "intimacy": 85,
+      "history": "刘备与赵云为主从关系，情同兄弟"
+    },
+    {
+      "general1": "guan_yu",
+      "general2": "lv_meng",
+      "type": "enemy",
+      "intimacy": -100,
+      "history": "吕蒙杀害关羽，为仇敌关系"
+    },
+    {
+      "general1": "zhang_fei",
+      "general2": "lv_meng",
+      "type": "enemy",
+      "intimacy": -95,
+      "history": "吕蒙杀害关羽，张飞视为仇敌"
+    }
+  ]
+}
