@@ -40,6 +40,7 @@ function App() {
   const [showLoadPanel, setShowLoadPanel] = useState(false);
   const [showAudioSettings, setShowAudioSettings] = useState(false);
   const [showBattle, setShowBattle] = useState(false);
+  const [isLoadingFromMenu, setIsLoadingFromMenu] = useState(false);
   
   const { 
     turn, 
@@ -61,6 +62,15 @@ function App() {
     setTactics,
     setStratagems
   } = useGameStore();
+
+  // 监听存档加载，自动进入游戏
+  useEffect(() => {
+    // 如果正在从主菜单加载存档且有游戏数据，则进入游戏
+    if (isLoadingFromMenu && gameState === 'menu' && Object.keys(cities).length > 0 && currentPlayer) {
+      setGameState('playing');
+      setIsLoadingFromMenu(false);
+    }
+  }, [cities, currentPlayer, gameState, isLoadingFromMenu]);
 
   // 加载游戏数据
   useEffect(() => {
@@ -149,12 +159,13 @@ function App() {
 
   const handleLoadGame = () => {
     console.log('加载存档');
-    // TODO: 实现存档加载逻辑
+    setIsLoadingFromMenu(true);
+    setShowLoadPanel(true);
   };
 
   const handleSettings = () => {
     console.log('游戏设置');
-    // TODO: 实现设置界面
+    setShowAudioSettings(true);
   };
 
   const handleNextTurn = () => {
@@ -695,26 +706,27 @@ function App() {
             <DiplomacyPanel onClose={() => setShowDiplomacyPanel(false)} />
           )}
           
-          {/* 存档面板 */}
-          {showSavePanel && (
-            <SaveLoadPanel mode="save" onClose={() => setShowSavePanel(false)} />
-          )}
-          
-          {/* 读取面板 */}
-          {showLoadPanel && (
-            <SaveLoadPanel mode="load" onClose={() => setShowLoadPanel(false)} />
-          )}
-          
-          {/* 音频设置面板 */}
-          {showAudioSettings && (
-            <AudioSettingsPanel onClose={() => setShowAudioSettings(false)} />
-          )}
-          
           {/* 战斗界面 */}
           {showBattle && (
             <BattleField onClose={() => setShowBattle(false)} />
           )}
         </div>
+      )}
+      
+      {/* 全局面板 - 主菜单和游戏中都可用 */}
+      {/* 存档面板 */}
+      {showSavePanel && (
+        <SaveLoadPanel mode="save" onClose={() => setShowSavePanel(false)} />
+      )}
+      
+      {/* 读取面板 */}
+      {showLoadPanel && (
+        <SaveLoadPanel mode="load" onClose={() => setShowLoadPanel(false)} />
+      )}
+      
+      {/* 音频设置面板 */}
+      {showAudioSettings && (
+        <AudioSettingsPanel onClose={() => setShowAudioSettings(false)} />
       )}
       
       {/* 全局对话框 */}
