@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useMapStore, useGameStore } from '@/store';
 import { HexGrid, HexCell } from '@/utils/HexGrid';
-import type { City, Faction } from '@/types';
+import { ArmyInfoPanel } from '@/components/UI/ArmyInfoPanel';
+import type { City, Faction, Army } from '@/types';
 
 interface GameMapProps {
   cities: City[];
@@ -21,6 +22,8 @@ export function GameMap({ cities }: GameMapProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [hoveredCity, setHoveredCity] = useState<string | null>(null);
+  const [hoveredArmy, setHoveredArmy] = useState<string | null>(null);
+  const [selectedArmy, setSelectedArmy] = useState<Army | null>(null);
   const [canvasSize, setCanvasSize] = useState({ width: 900, height: 600 });
   const [gridInitialized, setGridInitialized] = useState(false);
 
@@ -174,7 +177,7 @@ export function GameMap({ cities }: GameMapProps) {
       renderCacheRef.current.lastViewport = { ...viewport };
       renderCacheRef.current.needsRedraw = false;
     }
-  }, [cities, viewport, selectedCity, hoveredCity, factions, canvasSize, season, weather, armies, gridInitialized]);
+  }, [cities, viewport, selectedCity, hoveredCity, hoveredArmy, factions, canvasSize, season, weather, armies, gridInitialized]);
 
   // 缩放处理
   const handleZoom = useCallback((delta: number) => {
@@ -622,14 +625,24 @@ export function GameMap({ cities }: GameMapProps) {
       if (!city) return;
       
       const faction = factions[army.faction] as Faction | undefined;
-      const x = city.position.x;
-      const y = city.position.y;
+      const isHovered = hoveredArmy === army.id;
+      
+      // 使用对齐后的城市位置
+      let x = city.position.x;
+      let y = city.position.y;
+      
+      if (hexGridRef.current) {
+        const hexCoord = hexGridRef.current.pixelToHex(x, y);
+        const hexCenter = hexGridRef.current.hexToPixel(hexCoord.q, hexCoord.r);
+        x = hexCenter.x;
+        y = hexCenter.y;
+      }
       
       // 计算军队偏移（避免重叠）
       const cityArmies = Object.values(armies).filter(a => a.location === army.location);
       const armyIndex = cityArmies.indexOf(army);
       const offsetAngle = (armyIndex / cityArmies.length) * Math.PI * 2;
-      const offsetRadius = 35;
+      const offsetRadius = isHovered ? 40 : 35; // 悬停时稍微远离
       
       const armyX = x + Math.cos(offsetAngle) * offsetRadius;
       const armyY = y + Math.sin(offsetAngle) * offsetRadius;
@@ -639,13 +652,23 @@ export function GameMap({ cities }: GameMapProps) {
         const movement = army.movement;
         const targetCity = cities.find(c => c.id === movement.targetCity);
         if (targetCity) {
+          let targetX = targetCity.position.x;
+          let targetY = targetCity.position.y;
+          
+          if (hexGridRef.current) {
+            const targetHexCoord = hexGridRef.current.pixelToHex(targetX, targetY);
+            const targetHexCenter = hexGridRef.current.hexToPixel(targetHexCoord.q, targetHexCoord.r);
+            targetX = targetHexCenter.x;
+            targetY = targetHexCenter.y;
+          }
+          
           // 绘制移动路径
           ctx.beginPath();
           ctx.moveTo(armyX, armyY);
           
-          const midX = (armyX + targetCity.position.x) / 2;
-          const midY = (armyY + targetCity.position.y) / 2;
-          ctx.quadraticCurveTo(midX, midY - 20, targetCity.position.x, targetCity.position.y);
+          const midX = (armyX + targetX) / 2;
+          const midY = (armyY + targetY) / 2;
+          ctx.quadraticCurveTo(midX, midY - 20, targetX, targetY);
           
           ctx.strokeStyle = 'rgba(100, 150, 255, 0.6)';
           ctx.lineWidth = 2;
@@ -654,8 +677,8 @@ export function GameMap({ cities }: GameMapProps) {
           ctx.setLineDash([]);
           
           // 绘制移动进度
-          const progressX = armyX + (targetCity.position.x - armyX) * (movement.progress / 100);
-          const progressY = armyY + (targetCity.position.y - armyY) * (movement.progress / 100);
+          const progressX = armyX + (targetX - armyX) * (movement.progress / 100);
+          const progressY = armyY + (targetY - armyY) * (movement.progress / 100);
           
           ctx.beginPath();
           ctx.arc(progressX, progressY, 8, 0, Math.PI * 2);
@@ -667,30 +690,125 @@ export function GameMap({ cities }: GameMapProps) {
         }
       }
       
-      // 绘制军队标记
+      // 悬停时的光晕效果
+      if (isHovered) {
+        const gc = faction?.color || '#ff6b6b';
+        const gradient = ctx.createRadialGradient(armyX, armyY, 0, armyX, armyY, 40);
+        gradient.addColorStop(0, gc + '80');
+        gradient.addColorStop(0.5, gc + '40');
+        gradient.addColorStop(1, 'transparent');
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(armyX, armyY, 40, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      
+      // 绘制军队标记（精美旗帜样式）
+      const size = isHovered ? 24 : 20;
+      
+      ctx.save();
+      ctx.translate(armyX, armyY);
+      
+      // 底部光晕（增强显著性）
+      const glowGradient = ctx.createRadialGradient(0, 0, 0, 0, 0, size * 1.5);
+      glowGradient.addColorStop(0, (faction?.color || '#ff6b6b') + '40');
+      glowGradient.addColorStop(1, 'transparent');
+      ctx.fillStyle = glowGradient;
       ctx.beginPath();
-      ctx.arc(armyX, armyY, 12, 0, Math.PI * 2);
-      ctx.fillStyle = faction?.color || '#ff6b6b';
+      ctx.arc(0, 0, size * 1.5, 0, Math.PI * 2);
       ctx.fill();
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
-      ctx.lineWidth = 2;
+      
+      // 旗杆阴影
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+      ctx.shadowBlur = 4;
+      ctx.shadowOffsetX = 2;
+      ctx.shadowOffsetY = 2;
+      
+      // 旗杆
+      ctx.strokeStyle = '#654321';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(0, -size);
+      ctx.lineTo(0, size * 0.6);
       ctx.stroke();
       
-      // 绘制军队图标（剑）
+      // 旗杆顶部装饰（矛头）
+      ctx.fillStyle = '#DAA520';
+      ctx.beginPath();
+      ctx.moveTo(0, -size - 8);
+      ctx.lineTo(-3, -size);
+      ctx.lineTo(3, -size);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = '#B8860B';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      
+      // 重置阴影
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+      ctx.shadowBlur = 6;
+      ctx.shadowOffsetX = 3;
+      ctx.shadowOffsetY = 3;
+      
+      // 主旗帜（大三角旗）
+      ctx.fillStyle = faction?.color || '#ff6b6b';
+      ctx.beginPath();
+      ctx.moveTo(0, -size + 2);
+      ctx.lineTo(size * 1.2, -size * 0.5);
+      ctx.lineTo(size * 1.0, 0);
+      ctx.lineTo(0, size * 0.3);
+      ctx.closePath();
+      ctx.fill();
+      
+      // 旗帜边框（金色）
+      ctx.strokeStyle = '#FFD700';
+      ctx.lineWidth = isHovered ? 2.5 : 2;
+      ctx.stroke();
+      
+      // 旗帜上的装饰纹理
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(size * 0.3, -size * 0.6);
+      ctx.lineTo(size * 0.8, -size * 0.3);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(size * 0.4, -size * 0.3);
+      ctx.lineTo(size * 0.9, 0);
+      ctx.stroke();
+      
+      // 旗帜中央的军徽
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
       ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 14px Arial';
+      ctx.font = `bold ${isHovered ? 14 : 12}px Arial`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText('⚔', armyX, armyY);
+      ctx.fillText('⚔', size * 0.5, -size * 0.25);
       
-      // 显示军队兵力
+      ctx.restore();
+      
+      // 显示军队兵力（更大更醒目）
       const totalSoldiers = army.units.reduce((sum, u) => sum + u.count, 0);
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
-      ctx.shadowBlur = 3;
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 12px "Microsoft YaHei"';
-      ctx.fillText(`${Math.floor(totalSoldiers / 1000)}k`, armyX, armyY + 20);
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+      ctx.shadowBlur = 4;
+      ctx.fillStyle = isHovered ? '#ffffff' : '#FFD700';
+      ctx.font = `bold ${isHovered ? 14 : 12}px "Microsoft YaHei"`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(`${Math.floor(totalSoldiers / 1000)}k`, armyX, armyY + size + 12);
       ctx.shadowBlur = 0;
+      
+      // 悬停时显示军队名称（更醒目）
+      if (isHovered) {
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+        ctx.shadowBlur = 6;
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 16px "SimSun", serif';
+        ctx.fillText(`${faction?.name || '未知'}军团`, armyX, armyY - size - 20);
+        ctx.shadowBlur = 0;
+      }
     });
   };
 
@@ -774,14 +892,42 @@ export function GameMap({ cities }: GameMapProps) {
     const mouseX = (e.clientX - rect.left - canvasSize.width / 2) / scale - viewport.x + MAP_WIDTH / 2;
     const mouseY = (e.clientY - rect.top - canvasSize.height / 2) / scale - viewport.y + MAP_HEIGHT / 2;
     
-    // 检测悬停的城市（使用对齐后的位置）
-    const hovered = cities.find(city => {
+    // 检测悬停的军队（优先级高于城市）
+    let hoveredArmyId: string | null = null;
+    Object.values(armies).forEach(army => {
+      const city = cities.find(c => c.id === army.location);
+      if (!city) return;
+      
       const alignedPos = getCityAlignedPosition(city);
-      const dx = alignedPos.x - mouseX;
-      const dy = alignedPos.y - mouseY;
-      return Math.sqrt(dx*dx + dy*dy) < 50;
+      const cityArmies = Object.values(armies).filter(a => a.location === army.location);
+      const armyIndex = cityArmies.indexOf(army);
+      const offsetAngle = (armyIndex / cityArmies.length) * Math.PI * 2;
+      const offsetRadius = 35;
+      
+      const armyX = alignedPos.x + Math.cos(offsetAngle) * offsetRadius;
+      const armyY = alignedPos.y + Math.sin(offsetAngle) * offsetRadius;
+      
+      const dx = armyX - mouseX;
+      const dy = armyY - mouseY;
+      if (Math.sqrt(dx * dx + dy * dy) < 20) {
+        hoveredArmyId = army.id;
+      }
     });
-    setHoveredCity(hovered?.id || null);
+    
+    setHoveredArmy(hoveredArmyId);
+    
+    // 如果没有悬停军队，检测悬停的城市
+    if (!hoveredArmyId) {
+      const hovered = cities.find(city => {
+        const alignedPos = getCityAlignedPosition(city);
+        const dx = alignedPos.x - mouseX;
+        const dy = alignedPos.y - mouseY;
+        return Math.sqrt(dx * dx + dy * dy) < 50;
+      });
+      setHoveredCity(hovered?.id || null);
+    } else {
+      setHoveredCity(null);
+    }
     
     // 拖拽地图
     if (!isDragging) return;
@@ -819,70 +965,111 @@ export function GameMap({ cities }: GameMapProps) {
     const clickX = (e.clientX - rect.left - canvasSize.width / 2) / scale - viewport.x + MAP_WIDTH / 2;
     const clickY = (e.clientY - rect.top - canvasSize.height / 2) / scale - viewport.y + MAP_HEIGHT / 2;
     
-    // 检测点击的城市（使用对齐后的位置）
-    const clicked = cities.find(city => {
+    // 检测点击的军队（优先级高于城市）
+    let clickedArmy: Army | null = null;
+    Object.values(armies).forEach(army => {
+      const city = cities.find(c => c.id === army.location);
+      if (!city) return;
+      
       const alignedPos = getCityAlignedPosition(city);
-      const dx = alignedPos.x - clickX;
-      const dy = alignedPos.y - clickY;
-      return Math.sqrt(dx*dx + dy*dy) < 50;
+      const cityArmies = Object.values(armies).filter(a => a.location === army.location);
+      const armyIndex = cityArmies.indexOf(army);
+      const offsetAngle = (armyIndex / cityArmies.length) * Math.PI * 2;
+      const offsetRadius = 35;
+      
+      const armyX = alignedPos.x + Math.cos(offsetAngle) * offsetRadius;
+      const armyY = alignedPos.y + Math.sin(offsetAngle) * offsetRadius;
+      
+      const dx = armyX - clickX;
+      const dy = armyY - clickY;
+      if (Math.sqrt(dx * dx + dy * dy) < 20) {
+        clickedArmy = army;
+      }
     });
-    setSelectedCity(clicked?.id || null);
+    
+    if (clickedArmy) {
+      // 显示军队信息面板
+      setSelectedArmy(clickedArmy);
+      setSelectedCity(null);
+    } else {
+      // 检测点击的城市（使用对齐后的位置）
+      const clicked = cities.find(city => {
+        const alignedPos = getCityAlignedPosition(city);
+        const dx = alignedPos.x - clickX;
+        const dy = alignedPos.y - clickY;
+        return Math.sqrt(dx * dx + dy * dy) < 50;
+      });
+      setSelectedCity(clicked?.id || null);
+      setSelectedArmy(null);
+    }
   };
 
   return (
     <div ref={containerRef} className="w-full h-full flex items-center justify-center relative">
-      <canvas
-        ref={canvasRef}
-        width={canvasSize.width}
-        height={canvasSize.height}
-        className="border border-[#a09070]/30 rounded-lg"
-        style={{ 
-          cursor: isDragging ? 'grabbing' : 'grab',
-          boxShadow: '0 10px 40px rgba(0, 0, 0, 0.7)',
-          background: 'linear-gradient(135deg, #0a1628 0%, #1a2a4a 50%, #0d1f3c 100%)'
-        }}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-        onClick={handleClick}
-        onWheel={handleWheel}
-      />
-      {/* 缩放控制按钮 */}
-      <div className="absolute top-20 right-4 flex flex-col gap-2">
-        <button
-          onClick={() => handleZoom(ZOOM_STEP)}
-          disabled={viewport.zoom >= MAX_ZOOM}
-          className="w-10 h-10 flex items-center justify-center bg-[rgba(13,18,25,0.85)] border border-[rgba(200,180,140,0.5)] rounded-lg hover:bg-[rgba(30,40,60,0.9)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          title="放大"
-        >
-          <svg className="w-5 h-5 text-[rgba(200,180,140,0.9)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v12m6-6H6" />
-          </svg>
-        </button>
-        <button
-          onClick={() => handleZoom(-ZOOM_STEP)}
-          disabled={viewport.zoom <= MIN_ZOOM}
-          className="w-10 h-10 flex items-center justify-center bg-[rgba(13,18,25,0.85)] border border-[rgba(200,180,140,0.5)] rounded-lg hover:bg-[rgba(30,40,60,0.9)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          title="缩小"
-        >
-          <svg className="w-5 h-5 text-[rgba(200,180,140,0.9)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 12H6" />
-          </svg>
-        </button>
-        <button
-          onClick={handleCenter}
-          className="w-10 h-10 flex items-center justify-center bg-[rgba(13,18,25,0.85)] border border-[rgba(200,180,140,0.5)] rounded-lg hover:bg-[rgba(30,40,60,0.9)] transition-colors"
-          title="居中地图"
-        >
-          <svg className="w-5 h-5 text-[rgba(200,180,140,0.9)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-          </svg>
-        </button>
-      </div>
-      {/* 缩放比例显示 */}
-      <div className="absolute bottom-4 right-4 px-3 py-1 bg-[rgba(13,18,25,0.85)] border border-[rgba(200,180,140,0.5)] rounded text-[rgba(200,180,140,0.9)] text-sm">
-        {Math.round(viewport.zoom * 100)}%
+      <div className="relative">
+        <canvas
+          ref={canvasRef}
+          width={canvasSize.width}
+          height={canvasSize.height}
+          className="border border-[#a09070]/30 rounded-lg"
+          style={{ 
+            cursor: hoveredArmy ? 'pointer' : (isDragging ? 'grabbing' : 'grab'),
+            boxShadow: '0 10px 40px rgba(0, 0, 0, 0.7)',
+            background: 'linear-gradient(135deg, #0a1628 0%, #1a2a4a 50%, #0d1f3c 100%)'
+          }}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+          onClick={handleClick}
+          onWheel={handleWheel}
+        />
+        
+      {/* 军队信息面板 */}
+      {selectedArmy && (
+        <ArmyInfoPanel 
+          army={selectedArmy}
+          onClose={() => setSelectedArmy(null)}
+        />
+      )}
+        
+        {/* 缩放控制按钮 */}
+        <div className="absolute top-20 right-4 flex flex-col gap-2">
+          <button
+            onClick={() => handleZoom(ZOOM_STEP)}
+            disabled={viewport.zoom >= MAX_ZOOM}
+            className="w-10 h-10 flex items-center justify-center bg-[rgba(13,18,25,0.85)] border border-[rgba(200,180,140,0.5)] rounded-lg hover:bg-[rgba(30,40,60,0.9)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            title="放大"
+          >
+            <svg className="w-5 h-5 text-[rgba(200,180,140,0.9)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v12m6-6H6" />
+            </svg>
+          </button>
+          <button
+            onClick={() => handleZoom(-ZOOM_STEP)}
+            disabled={viewport.zoom <= MIN_ZOOM}
+            className="w-10 h-10 flex items-center justify-center bg-[rgba(13,18,25,0.85)] border border-[rgba(200,180,140,0.5)] rounded-lg hover:bg-[rgba(30,40,60,0.9)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            title="缩小"
+          >
+            <svg className="w-5 h-5 text-[rgba(200,180,140,0.9)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 12H6" />
+            </svg>
+          </button>
+          <button
+            onClick={handleCenter}
+            className="w-10 h-10 flex items-center justify-center bg-[rgba(13,18,25,0.85)] border border-[rgba(200,180,140,0.5)] rounded-lg hover:bg-[rgba(30,40,60,0.9)] transition-colors"
+            title="居中地图"
+          >
+            <svg className="w-5 h-5 text-[rgba(200,180,140,0.9)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+            </svg>
+          </button>
+        </div>
+        
+        {/* 缩放比例显示 */}
+        <div className="absolute bottom-4 right-4 px-3 py-1 bg-[rgba(13,18,25,0.85)] border border-[rgba(200,180,140,0.5)] rounded text-[rgba(200,180,140,0.9)] text-sm">
+          {Math.round(viewport.zoom * 100)}%
+        </div>
       </div>
     </div>
   );

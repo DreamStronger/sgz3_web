@@ -13,20 +13,48 @@ import { SaveLoadPanel } from './components/UI/SaveLoadPanel';
 import { AudioSettingsPanel } from './components/UI/AudioSettingsPanel';
 import { Dialog } from './components/UI/Dialog';
 import { BattleField } from './components/Battle/BattleField';
+import { EventLogPanel, MiniEventLog } from './components/UI/EventLogPanel';
 import { useGameStore } from './store';
 import { SupplySystem, FoodShortageLevel } from './systems/supply/SupplySystem';
+import { EventLogSystem } from './systems/eventLog/EventLogSystem';
+import { SaveSystem } from './systems/save/SaveSystem';
 import type { City, Faction, General, Title, GeneralRelation, Formation, Tactics, Stratagem } from './types';
-import citiesData from './data/cities/yellow_turban.json';
-import generalsData from './data/generals/yellow_turban.json';
-import factionsData from './data/factions.json';
 import titlesData from './data/titles.json';
-import relationsData from './data/relations/yellow_turban.json';
 import formationsData from './data/formations.json';
 import tacticsData from './data/tactics.json';
 import stratagemsData from './data/stratagems.json';
 
+// 剧本数据映射
+const scenarioDataMap = {
+  yellow_turban: {
+    cities: () => import('./data/cities/yellow_turban.json'),
+    generals: () => import('./data/generals/yellow_turban.json'),
+    factions: () => import('./data/factions/yellow_turban.json'),
+    relations: () => import('./data/relations/yellow_turban.json'),
+  },
+  warlords: {
+    cities: () => import('./data/cities/warlords.json'),
+    generals: () => import('./data/generals/warlords.json'),
+    factions: () => import('./data/factions/warlords.json'),
+    relations: () => import('./data/relations/han_officials.json'),
+  },
+  guandu: {
+    cities: () => import('./data/cities/guandu.json'),
+    generals: () => import('./data/generals/guandu.json'),
+    factions: () => import('./data/factions/guandu.json'),
+    relations: () => import('./data/relations/han_officials.json'),
+  },
+  three_kingdoms: {
+    cities: () => import('./data/cities/three_kingdoms.json'),
+    generals: () => import('./data/generals/three_kingdoms.json'),
+    factions: () => import('./data/factions/three_kingdoms.json'),
+    relations: () => import('./data/relations/han_officials.json'),
+  },
+};
+
 function App() {
   const [gameState, setGameState] = useState<'menu' | 'playing'>('menu');
+  const [selectedScenario, setSelectedScenario] = useState<string>('yellow_turban');
   const [showGeneralsModal, setShowGeneralsModal] = useState(false);
   const [showCitiesModal, setShowCitiesModal] = useState(false);
   const [showPoliticsPanel, setShowPoliticsPanel] = useState(false);
@@ -40,7 +68,9 @@ function App() {
   const [showLoadPanel, setShowLoadPanel] = useState(false);
   const [showAudioSettings, setShowAudioSettings] = useState(false);
   const [showBattle, setShowBattle] = useState(false);
+  const [showEventLog, setShowEventLog] = useState(false);
   const [isLoadingFromMenu, setIsLoadingFromMenu] = useState(false);
+  const [showAutoSaveToast, setShowAutoSaveToast] = useState(false);
   
   const { 
     turn, 
@@ -72,88 +102,185 @@ function App() {
     }
   }, [cities, currentPlayer, gameState, isLoadingFromMenu]);
 
-  // 加载游戏数据
+  // 快捷键支持
   useEffect(() => {
-    if (gameState === 'playing') {
-      // 初始化游戏数据
-      const citiesRecord: Record<string, City> = {};
-      (citiesData as City[]).forEach(city => {
-        citiesRecord[city.id] = { ...city, faction: '', generals: [] };
-      });
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (gameState !== 'playing') return;
+      
+      // 空格键或Enter键：下一回合
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        handleNextTurn();
+      }
+      // Escape键：关闭所有面板
+      if (e.key === 'Escape') {
+        setShowGeneralsModal(false);
+        setShowCitiesModal(false);
+        setShowPoliticsPanel(false);
+        setShowGeneralPanel(false);
+        setShowArmyPanel(false);
+        setShowCaptivePanel(false);
+        setShowSupplyPanel(false);
+        setShowBattlePanel(false);
+        setShowDiplomacyPanel(false);
+        setShowSavePanel(false);
+        setShowLoadPanel(false);
+        setShowAudioSettings(false);
+        setShowEventLog(false);
+      }
+      // L键：打开事件日志
+      if (e.key === 'l' || e.key === 'L') {
+        setShowEventLog(true);
+      }
+    };
 
-      const generalsRecord: Record<string, General> = {};
-      (generalsData as unknown as General[]).forEach(general => {
-        generalsRecord[general.id] = general;
-      });
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [gameState]);
 
-      const factionsRecord: Record<string, Faction> = {};
-      (factionsData as Faction[]).forEach(faction => {
-        factionsRecord[faction.id] = faction;
-        // 设置城市的所属势力
-        faction.cities.forEach(cityId => {
-          if (citiesRecord[cityId]) {
-            citiesRecord[cityId].faction = faction.id;
-          }
-        });
-        // 设置武将所在城市
-        faction.generals.forEach(generalId => {
-          const general = generalsRecord[generalId];
-          if (general && citiesRecord[general.location]) {
-            citiesRecord[general.location].generals.push(generalId);
-          }
-        });
-      });
+  // 自动存档系统
+  useEffect(() => {
+    if (gameState !== 'playing' || !currentPlayer) return;
 
-      // 加载官职数据
-      const titlesRecord: Record<string, Title> = {};
-      (titlesData as Title[]).forEach(title => {
-        titlesRecord[title.id] = title;
-      });
-      setTitles(titlesRecord);
-
-      // 加载关系数据
-      setRelations((relationsData as { relations: GeneralRelation[] }).relations);
-
-      // 加载阵型数据
-      const formationsRecord: Record<string, Formation> = {};
-      (formationsData as Formation[]).forEach(formation => {
-        formationsRecord[formation.id] = formation;
-      });
-      setFormations(formationsRecord);
-
-      // 加载战术数据
-      const tacticsRecord: Record<string, Tactics> = {};
-      (tacticsData as Tactics[]).forEach(tactics => {
-        tacticsRecord[tactics.id] = tactics;
-      });
-      setTactics(tacticsRecord);
-
-      // 加载计谋数据
-      const stratagemsRecord: Record<string, Stratagem> = {};
-      (stratagemsData as Stratagem[]).forEach(stratagem => {
-        stratagemsRecord[stratagem.id] = stratagem;
-      });
-      setStratagems(stratagemsRecord);
-
-      loadGame({
-        turn: 1,
-        season: 'spring',
-        weather: 'sunny',
-        scenario: 'yellow_turban',
-        factions: factionsRecord,
-        cities: citiesRecord,
-        generals: generalsRecord,
+    const autoSaveInterval = setInterval(() => {
+      const gameStateData = {
+        turn,
+        season,
+        weather,
+        scenario: selectedScenario,
+        factions,
+        cities,
+        generals,
         items: {},
         armies: {},
         battles: {},
         captives: [],
-        currentPlayer: 'han'
-      });
-    }
-  }, [gameState, loadGame, setTitles, setRelations, setFormations, setTactics, setStratagems]);
+        currentPlayer
+      };
 
-  const handleStartGame = () => {
-    console.log('开始游戏');
+      const success = SaveSystem.saveGame('auto', `自动存档 - 回合${turn}`, gameStateData, currentPlayer);
+      if (success) {
+        EventLogSystem.info('自动存档成功', `回合 ${turn}`, turn);
+        // 显示保存提示
+        setShowAutoSaveToast(true);
+        setTimeout(() => setShowAutoSaveToast(false), 3000);
+      }
+    }, 5 * 60 * 1000); // 每5分钟自动存档
+
+    return () => clearInterval(autoSaveInterval);
+  }, [gameState, turn, season, weather, selectedScenario, factions, cities, generals, currentPlayer]);
+
+  // 加载游戏数据
+  useEffect(() => {
+    if (gameState === 'playing') {
+      // 动态加载剧本数据
+      const loadScenarioData = async () => {
+        const scenarioLoader = scenarioDataMap[selectedScenario as keyof typeof scenarioDataMap];
+        if (!scenarioLoader) return;
+
+        try {
+          const [citiesModule, generalsModule, factionsModule, relationsModule] = await Promise.all([
+            scenarioLoader.cities(),
+            scenarioLoader.generals(),
+            scenarioLoader.factions(),
+            scenarioLoader.relations(),
+          ]);
+
+          const citiesData = citiesModule.default || citiesModule;
+          const generalsData = generalsModule.default || generalsModule;
+          const factionsData = factionsModule.default || factionsModule;
+          const relationsData = relationsModule.default || relationsModule;
+
+          // 初始化游戏数据
+          const citiesRecord: Record<string, City> = {};
+          (citiesData as City[]).forEach(city => {
+            citiesRecord[city.id] = { ...city, faction: '', generals: [] };
+          });
+
+          const generalsRecord: Record<string, General> = {};
+          (generalsData as unknown as General[]).forEach(general => {
+            generalsRecord[general.id] = general;
+          });
+
+          const factionsRecord: Record<string, Faction> = {};
+          (factionsData as Faction[]).forEach(faction => {
+            factionsRecord[faction.id] = faction;
+            // 设置城市的所属势力
+            faction.cities.forEach(cityId => {
+              if (citiesRecord[cityId]) {
+                citiesRecord[cityId].faction = faction.id;
+              }
+            });
+            // 设置武将所在城市
+            faction.generals.forEach(generalId => {
+              const general = generalsRecord[generalId];
+              if (general && citiesRecord[general.location]) {
+                citiesRecord[general.location].generals.push(generalId);
+              }
+            });
+          });
+
+          // 加载官职数据
+          const titlesRecord: Record<string, Title> = {};
+          (titlesData as Title[]).forEach(title => {
+            titlesRecord[title.id] = title;
+          });
+          setTitles(titlesRecord);
+
+          // 加载关系数据
+          setRelations((relationsData as { relations: GeneralRelation[] }).relations);
+
+          // 加载阵型数据
+          const formationsRecord: Record<string, Formation> = {};
+          (formationsData as Formation[]).forEach(formation => {
+            formationsRecord[formation.id] = formation;
+          });
+          setFormations(formationsRecord);
+
+          // 加载战术数据
+          const tacticsRecord: Record<string, Tactics> = {};
+          (tacticsData as Tactics[]).forEach(tactics => {
+            tacticsRecord[tactics.id] = tactics;
+          });
+          setTactics(tacticsRecord);
+
+          // 加载计谋数据
+          const stratagemsRecord: Record<string, Stratagem> = {};
+          (stratagemsData as Stratagem[]).forEach(stratagem => {
+            stratagemsRecord[stratagem.id] = stratagem;
+          });
+          setStratagems(stratagemsRecord);
+
+          // 找到玩家势力
+          const playerFaction = (factionsData as Faction[]).find(f => f.isPlayer);
+          const currentPlayerId = playerFaction?.id || 'han';
+
+          loadGame({
+            turn: 1,
+            season: 'spring',
+            weather: 'sunny',
+            scenario: selectedScenario,
+            factions: factionsRecord,
+            cities: citiesRecord,
+            generals: generalsRecord,
+            items: {},
+            armies: {},
+            battles: {},
+            captives: [],
+            currentPlayer: currentPlayerId
+          });
+        } catch (error) {
+          console.error('加载剧本数据失败:', error);
+        }
+      };
+
+      loadScenarioData();
+    }
+  }, [gameState, selectedScenario, loadGame, setTitles, setRelations, setFormations, setTactics, setStratagems]);
+
+  const handleStartGame = (scenarioId: string) => {
+    console.log('开始游戏:', scenarioId);
+    setSelectedScenario(scenarioId);
     setGameState('playing');
   };
 
@@ -169,6 +296,10 @@ function App() {
   };
 
   const handleNextTurn = () => {
+    const currentTurn = turn;
+    
+    EventLogSystem.info('回合结束', `第 ${currentTurn} 回合结束`, currentTurn);
+
     // 计算资源产出
     const seasonMultiplier: Record<string, number> = {
       spring: 1.0,
@@ -245,8 +376,17 @@ function App() {
         
         // 显示警告（只在玩家城市）
         if (city.faction === currentPlayer && foodResult.shortageLevel !== FoodShortageLevel.LIGHT) {
-          console.warn(`${city.name}: ${foodResult.message}`);
+          EventLogSystem.warning(`${city.name}粮草不足`, foodResult.message, currentTurn);
         }
+      }
+      
+      // 记录玩家城市的资源产出
+      if (city.faction === currentPlayer) {
+        EventLogSystem.economy(
+          `${city.name}资源产出`,
+          `金钱+${moneyIncome} 粮草+${foodIncome} 兵员+${soldierIncome}`,
+          currentTurn
+        );
       }
     });
 
@@ -308,6 +448,15 @@ function App() {
       if (loyaltyChange !== 0) {
         const newLoyalty = Math.max(0, Math.min(100, general.loyalty + loyaltyChange));
         updateGeneral(general.id, { loyalty: newLoyalty });
+        
+        // 忠诚度过低警告
+        if (newLoyalty < 30 && general.faction === currentPlayer) {
+          EventLogSystem.warning(
+            `${general.name}忠诚度过低`,
+            `忠诚度: ${newLoyalty}`,
+            currentTurn
+          );
+        }
       }
     });
 
@@ -316,7 +465,11 @@ function App() {
     // 随机天气
     randomWeather();
     
-    console.log(`回合 ${turn} -> ${turn + 1}, 季节: ${season}, 天气: ${weather}`);
+    EventLogSystem.success(
+      '新回合开始',
+      `第 ${turn} 回合 - ${getSeasonText(season)}季 - ${getWeatherText(weather)}`,
+      turn
+    );
   };
 
   const getSeasonText = (season: string) => {
@@ -365,15 +518,28 @@ function App() {
       
       {gameState === 'playing' && (
         <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-950 to-black text-white flex flex-col">
+          {/* 自动保存提示Toast */}
+          {showAutoSaveToast && (
+            <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-[200] animate-fade-in">
+              <div className="bg-gradient-to-r from-green-900/95 to-green-800/95 px-6 py-3 rounded-lg shadow-2xl border-2 border-green-600/50 flex items-center space-x-3">
+                <span className="text-2xl">💾</span>
+                <div>
+                  <div className="font-semibold text-green-100">自动存档成功</div>
+                  <div className="text-xs text-green-200/80">回合 {turn}</div>
+                </div>
+              </div>
+            </div>
+          )}
+          
           {/* 顶部状态栏 */}
           <header className="bg-gradient-to-r from-amber-950/80 via-stone-900/90 to-amber-950/80 shadow-2xl border-b-2 border-amber-800/50 backdrop-blur-sm">
             <div className="py-3 px-6 flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 <h1 className="text-xl font-bold tracking-wider" style={{ fontFamily: '"STKaiti", "KaiTi", serif' }}>三国志3 - 网页版</h1>
                 <span className="text-amber-600/60">|</span>
-                <span className="text-sm text-amber-200/80">剧本: 黄巾之乱</span>
+                <span className="text-sm text-amber-200/80">剧本: {selectedScenario === 'yellow_turban' ? '黄巾之乱' : selectedScenario === 'warlords' ? '群雄割据' : selectedScenario === 'guandu' ? '官渡之战' : '三足鼎立'}</span>
               </div>
-              <div className="flex items-center space-x-6">
+              <div className="flex items-center space-x-4">
                 <span className="text-sm bg-stone-800/80 px-3 py-1 rounded border border-amber-700/30">
                   回合: {turn}
                 </span>
@@ -384,10 +550,10 @@ function App() {
                   {getWeatherIcon(weather)} {getWeatherText(weather)}
                 </span>
                 <button
-                  onClick={handleNextTurn}
-                  className="bg-gradient-to-r from-amber-700 to-amber-600 hover:from-amber-600 hover:to-amber-500 px-4 py-1 rounded text-sm font-medium transition-all shadow-lg border border-amber-500/30"
+                  onClick={() => setShowEventLog(true)}
+                  className="bg-stone-800/80 hover:bg-stone-700/80 px-3 py-1 rounded text-sm transition-colors border border-amber-700/30"
                 >
-                  下一回合
+                  📜 日志
                 </button>
                 <button
                   onClick={() => setGameState('menu')}
@@ -510,6 +676,9 @@ function App() {
                   ))}
                 </div>
               </div>
+
+              {/* 迷你事件日志 */}
+              <MiniEventLog />
             </div>
 
             {/* 右侧地图区域 */}
@@ -528,6 +697,19 @@ function App() {
           {/* 底部悬浮导航栏 */}
           <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-r from-amber-950/95 via-stone-900/95 to-amber-950/95 border-t-2 border-amber-800/50 backdrop-blur-md shadow-2xl z-50">
             <div className="py-3 px-6 flex items-center justify-center space-x-3">
+              {/* 下一回合按钮（固定显示） */}
+              <button
+                onClick={handleNextTurn}
+                className="bg-gradient-to-r from-amber-700 to-amber-600 hover:from-amber-600 hover:to-amber-500 px-8 py-3 rounded-lg text-base font-bold transition-all shadow-lg border border-amber-500/30 flex items-center space-x-2 animate-pulse"
+                style={{ fontFamily: '"STKaiti", "KaiTi", serif' }}
+              >
+                <span>⏭️</span>
+                <span>下一回合</span>
+                <span className="text-xs text-amber-300/80">(空格)</span>
+              </button>
+              
+              <div className="h-8 w-px bg-amber-700/30"></div>
+              
               <button 
                 onClick={() => setShowPoliticsPanel(true)}
                 className="bg-gradient-to-br from-blue-900/80 to-blue-800/80 hover:from-blue-800/90 hover:to-blue-700/90 px-6 py-2.5 rounded-lg text-sm font-medium transition-all shadow-lg border border-blue-600/40 flex items-center space-x-2" style={{ fontFamily: '"STKaiti", "KaiTi", serif' }}>
@@ -565,6 +747,12 @@ function App() {
                 <span>外交</span>
               </button>
               <button 
+                onClick={() => setShowGeneralPanel(true)}
+                className="bg-gradient-to-br from-purple-900/80 to-purple-800/80 hover:from-purple-800/90 hover:to-purple-700/90 px-6 py-2.5 rounded-lg text-sm font-medium transition-all shadow-lg border border-purple-600/40 flex items-center space-x-2" style={{ fontFamily: '"STKaiti", "KaiTi", serif' }}>
+                <span>👤</span>
+                <span>武将</span>
+              </button>
+              <button 
                 onClick={() => setShowSavePanel(true)}
                 className="bg-gradient-to-br from-cyan-900/80 to-cyan-800/80 hover:from-cyan-800/90 hover:to-cyan-700/90 px-6 py-2.5 rounded-lg text-sm font-medium transition-all shadow-lg border border-cyan-600/40 flex items-center space-x-2" style={{ fontFamily: '"STKaiti", "KaiTi", serif' }}>
                 <span>💾</span>
@@ -575,12 +763,6 @@ function App() {
                 className="bg-gradient-to-br from-teal-900/80 to-teal-800/80 hover:from-teal-800/90 hover:to-teal-700/90 px-6 py-2.5 rounded-lg text-sm font-medium transition-all shadow-lg border border-teal-600/40 flex items-center space-x-2" style={{ fontFamily: '"STKaiti", "KaiTi", serif' }}>
                 <span>📂</span>
                 <span>读取</span>
-              </button>
-              <button 
-                onClick={() => setShowGeneralPanel(true)}
-                className="bg-gradient-to-br from-purple-900/80 to-purple-800/80 hover:from-purple-800/90 hover:to-purple-700/90 px-6 py-2.5 rounded-lg text-sm font-medium transition-all shadow-lg border border-purple-600/40 flex items-center space-x-2" style={{ fontFamily: '"STKaiti", "KaiTi", serif' }}>
-                <span>👤</span>
-                <span>武将</span>
               </button>
               <button 
                 onClick={() => setShowAudioSettings(true)}
@@ -727,6 +909,11 @@ function App() {
       {/* 音频设置面板 */}
       {showAudioSettings && (
         <AudioSettingsPanel onClose={() => setShowAudioSettings(false)} />
+      )}
+      
+      {/* 事件日志面板 */}
+      {showEventLog && (
+        <EventLogPanel isOpen={showEventLog} onClose={() => setShowEventLog(false)} />
       )}
       
       {/* 全局对话框 */}

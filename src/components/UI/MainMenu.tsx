@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 interface MainMenuProps {
-  onStartGame: () => void;
+  onStartGame: (scenarioId: string) => void;
   onLoadGame: () => void;
   onSettings: () => void;
 }
@@ -112,7 +112,7 @@ export function MainMenu({ onStartGame, onLoadGame, onSettings }: MainMenuProps)
               
               <div className="space-y-3">
                 <button
-                  onClick={onStartGame}
+                  onClick={() => onStartGame(selectedScenario)}
                   className="w-full bg-gradient-to-r from-amber-700 to-amber-600 hover:from-amber-600 hover:to-amber-500 text-white font-bold py-4 px-6 rounded-lg transition-all duration-300 shadow-lg hover:shadow-amber-600/30 text-lg tracking-wider"
                 >
                   ⚔️ 开始游戏
