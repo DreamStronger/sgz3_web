@@ -1,0 +1,62 @@
+[
+  {
+    "id": "wei",
+    "name": "魏",
+    "ruler": "caopi",
+    "color": "#4169E1",
+    "cities": ["luoyang", "changan", "xuchang", "ye", "jinyang", "beiping", "runan", "shouchun", "xiapi", "tianshui"],
+    "generals": ["caopi", "simayi", "xiaohouyuan", "xiaohoudun", "caoren", "caohong", "zhangliao", "xuchu", "xuhuang", "zhanghe", "gaoLan", "dengai", "zhonghui"],
+    "resources": {
+      "money": 120000,
+      "food": 250000,
+      "soldiers": 60000
+    },
+    "diplomacy": {},
+    "isPlayer": false
+  },
+  {
+    "id": "shu",
+    "name": "蜀",
+    "ruler": "liubei",
+    "color": "#FFD700",
+    "cities": ["chengdu", "hanzhong", "jiangzhou", "xiangyang", "yongchang"],
+    "generals": ["liubei", "zhugeliang", "guanyu", "zhangfei", "zhaoyun", "huangzhong", "weiyan", "pangtong", "jiangwei", "mashu", "wangping", "zhangyi"],
+    "resources": {
+      "money": 60000,
+      "food": 120000,
+      "soldiers": 35000
+    },
+    "diplomacy": {},
+    "isPlayer": true
+  },
+  {
+    "id": "wu",
+    "name": "吴",
+    "ruler": "sunquan",
+    "color": "#00CED1",
+    "cities": ["jianye", "wu", "chaisang", "jiangling", "xiangyang"],
+    "generals": ["sunquan", "zhouyu", "lusu", "lvmeng", "luxun", "ganning", "taishici", "huanggai", "chengpu", "dingfeng", "xusheng"],
+    "resources": {
+      "money": 80000,
+      "food": 160000,
+      "soldiers": 40000
+    },
+    "diplomacy": {},
+    "isPlayer": false
+  },
+  {
+    "id": "nanman",
+    "name": "南蛮",
+    "ruler": "menghuo",
+    "color": "#8B0000",
+    "cities": ["yongchang"],
+    "generals": ["menghuo", "zhurong", "mengyou"],
+    "resources": {
+      "money": 15000,
+      "food": 30000,
+      "soldiers": 10000
+    },
+    "diplomacy": {},
+    "isPlayer": false
+  }
+]

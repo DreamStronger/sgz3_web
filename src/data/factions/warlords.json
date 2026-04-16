@@ -1,0 +1,122 @@
+[
+  {
+    "id": "dong",
+    "name": "董卓军",
+    "ruler": "dongzhuo",
+    "color": "#8B0000",
+    "cities": ["luoyang", "changan", "tianshui", "hanzhong"],
+    "generals": ["dongzhuo", "lvbu", "huaxiong", "lijue", "guosi", "fanChou", "zhangji"],
+    "resources": {
+      "money": 60000,
+      "food": 100000,
+      "soldiers": 30000
+    },
+    "diplomacy": {},
+    "isPlayer": false
+  },
+  {
+    "id": "caocao",
+    "name": "曹操",
+    "ruler": "caocao",
+    "color": "#4169E1",
+    "cities": ["xuchang", "runan", "shouchun"],
+    "generals": ["caocao", "xiaohouyuan", "xiaohoudun", "caoren", "caohong", "dianwei", "xuchu"],
+    "resources": {
+      "money": 35000,
+      "food": 70000,
+      "soldiers": 15000
+    },
+    "diplomacy": {},
+    "isPlayer": true
+  },
+  {
+    "id": "yuan_shao",
+    "name": "袁绍",
+    "ruler": "yuan_shao",
+    "color": "#DC143C",
+    "cities": ["ye", "jinyang", "beiping", "xiapi"],
+    "generals": ["yuan_shao", "wenchou", "yanliang", "zhanghe", "gaoLan", "tianfeng", "jishou"],
+    "resources": {
+      "money": 50000,
+      "food": 90000,
+      "soldiers": 25000
+    },
+    "diplomacy": {},
+    "isPlayer": false
+  },
+  {
+    "id": "sunce",
+    "name": "孙策",
+    "ruler": "sunce",
+    "color": "#00CED1",
+    "cities": ["jianye", "wu", "chaisang"],
+    "generals": ["sunce", "zhouyu", "sunquan", "zhangzhao", "taishici", "huanggai", "chengpu"],
+    "resources": {
+      "money": 28000,
+      "food": 55000,
+      "soldiers": 12000
+    },
+    "diplomacy": {},
+    "isPlayer": false
+  },
+  {
+    "id": "liu_biao",
+    "name": "刘表",
+    "ruler": "liubiao",
+    "color": "#228B22",
+    "cities": ["xiangyang", "jiangling"],
+    "generals": ["liubiao", "huangzhong", "weiyan", "wenpin"],
+    "resources": {
+      "money": 22000,
+      "food": 45000,
+      "soldiers": 10000
+    },
+    "diplomacy": {},
+    "isPlayer": false
+  },
+  {
+    "id": "liubei",
+    "name": "刘备",
+    "ruler": "liubei",
+    "color": "#FFD700",
+    "cities": ["xinye"],
+    "generals": ["liubei", "guanyu", "zhangfei", "zhaoyun"],
+    "resources": {
+      "money": 8000,
+      "food": 15000,
+      "soldiers": 5000
+    },
+    "diplomacy": {},
+    "isPlayer": false
+  },
+  {
+    "id": "machao",
+    "name": "马腾",
+    "ruler": "mateng",
+    "color": "#9932CC",
+    "cities": ["chengdu", "jiangzhou"],
+    "generals": ["mateng", "machao", "matai", "pangde"],
+    "resources": {
+      "money": 20000,
+      "food": 40000,
+      "soldiers": 10000
+    },
+    "diplomacy": {},
+    "isPlayer": false
+  },
+  {
+    "id": "yuan_shu",
+    "name": "袁术",
+    "ruler": "yuan_shu",
+    "color": "#FF69B4",
+    "cities": ["shouchun"],
+    "generals": ["yuan_shu", "jiling", "zhangxun"],
+    "resources": {
+      "money": 15000,
+      "food": 30000,
+      "soldiers": 8000
+    },
+    "diplomacy": {},
+    "isPlayer": false
+  }
+]

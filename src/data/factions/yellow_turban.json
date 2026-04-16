@@ -1,0 +1,107 @@
+[
+  {
+    "id": "yellow_turban",
+    "name": "黄巾军",
+    "ruler": "zhangjiao",
+    "color": "#FFD700",
+    "cities": ["luoyang", "xuchang", "ye", "changan"],
+    "generals": ["zhangjiao", "zhangbao", "zhangliang", "bocai", "chengyuanzhi", "dengmao", "gaosheng", "yanzheng"],
+    "resources": {
+      "money": 30000,
+      "food": 60000,
+      "soldiers": 15000
+    },
+    "diplomacy": {},
+    "isPlayer": false
+  },
+  {
+    "id": "han",
+    "name": "汉室",
+    "ruler": "hejin",
+    "color": "#4169E1",
+    "cities": ["xiangyang", "jianye", "runan", "shouchun"],
+    "generals": ["hejin", "luzhi", "huangfusong", "zhujun", "caocao", "liubei", "guanyu", "zhangfei", "sunjian", "sunce", "zhouyu"],
+    "resources": {
+      "money": 50000,
+      "food": 80000,
+      "soldiers": 20000
+    },
+    "diplomacy": {},
+    "isPlayer": true
+  },
+  {
+    "id": "dong",
+    "name": "董卓军",
+    "ruler": "dongzhuo",
+    "color": "#8B0000",
+    "cities": ["tianshui", "hanzhong"],
+    "generals": ["dongzhuo", "lvbu", "huaxiong"],
+    "resources": {
+      "money": 20000,
+      "food": 40000,
+      "soldiers": 10000
+    },
+    "diplomacy": {},
+    "isPlayer": false
+  },
+  {
+    "id": "liu_biao",
+    "name": "刘表",
+    "ruler": "liubiao",
+    "color": "#228B22",
+    "cities": ["jiangling", "chaisang"],
+    "generals": ["liubiao"],
+    "resources": {
+      "money": 15000,
+      "food": 30000,
+      "soldiers": 6000
+    },
+    "diplomacy": {},
+    "isPlayer": false
+  },
+  {
+    "id": "yuan_shao",
+    "name": "袁绍",
+    "ruler": "yuan_shao",
+    "color": "#DC143C",
+    "cities": ["jinyang", "beiping", "xiapi"],
+    "generals": ["yuan_shao", "wenchou", "yanliang"],
+    "resources": {
+      "money": 25000,
+      "food": 50000,
+      "soldiers": 12000
+    },
+    "diplomacy": {},
+    "isPlayer": false
+  },
+  {
+    "id": "chengdu",
+    "name": "益州",
+    "ruler": "liuyan",
+    "color": "#9932CC",
+    "cities": ["chengdu", "jiangzhou", "yongchang"],
+    "generals": ["liuyan"],
+    "resources": {
+      "money": 18000,
+      "food": 35000,
+      "soldiers": 7000
+    },
+    "diplomacy": {},
+    "isPlayer": false
+  },
+  {
+    "id": "wu",
+    "name": "吴郡",
+    "ruler": "sunce",
+    "color": "#00CED1",
+    "cities": ["wu"],
+    "generals": [],
+    "resources": {
+      "money": 12000,
+      "food": 25000,
+      "soldiers": 5000
+    },
+    "diplomacy": {},
+    "isPlayer": false
+  }
+]

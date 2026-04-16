@@ -1,0 +1,92 @@
+[
+  {
+    "id": "yuan_shao",
+    "name": "袁绍",
+    "ruler": "yuan_shao",
+    "color": "#DC143C",
+    "cities": ["ye", "jinyang", "beiping", "xiapi", "runan"],
+    "generals": ["yuan_shao", "wenchou", "yanliang", "zhanghe", "gaoLan", "tianfeng", "jishou", "shenpei", "xuyou"],
+    "resources": {
+      "money": 80000,
+      "food": 150000,
+      "soldiers": 40000
+    },
+    "diplomacy": {},
+    "isPlayer": false
+  },
+  {
+    "id": "caocao",
+    "name": "曹操",
+    "ruler": "caocao",
+    "color": "#4169E1",
+    "cities": ["xuchang", "luoyang", "shouchun", "changan"],
+    "generals": ["caocao", "xiaohouyuan", "xiaohoudun", "caoren", "caohong", "dianwei", "xuchu", "zhangliao", "xuyou", "guojia", "chengyu"],
+    "resources": {
+      "money": 50000,
+      "food": 100000,
+      "soldiers": 25000
+    },
+    "diplomacy": {},
+    "isPlayer": true
+  },
+  {
+    "id": "sunquan",
+    "name": "孙权",
+    "ruler": "sunquan",
+    "color": "#00CED1",
+    "cities": ["jianye", "wu", "chaisang", "jiangling"],
+    "generals": ["sunquan", "zhouyu", "lusu", "zhangzhao", "taishici", "huanggai", "chengpu", "ganning", "lvmeng"],
+    "resources": {
+      "money": 40000,
+      "food": 80000,
+      "soldiers": 20000
+    },
+    "diplomacy": {},
+    "isPlayer": false
+  },
+  {
+    "id": "liubei",
+    "name": "刘备",
+    "ruler": "liubei",
+    "color": "#FFD700",
+    "cities": ["xiangyang", "xinye"],
+    "generals": ["liubei", "guanyu", "zhangfei", "zhaoyun", "guanping", "zhoucang"],
+    "resources": {
+      "money": 15000,
+      "food": 30000,
+      "soldiers": 8000
+    },
+    "diplomacy": {},
+    "isPlayer": false
+  },
+  {
+    "id": "machao",
+    "name": "马超",
+    "ruler": "machao",
+    "color": "#9932CC",
+    "cities": ["tianshui", "hanzhong"],
+    "generals": ["machao", "matai", "pangde", "madai"],
+    "resources": {
+      "money": 25000,
+      "food": 50000,
+      "soldiers": 15000
+    },
+    "diplomacy": {},
+    "isPlayer": false
+  },
+  {
+    "id": "liuzhang",
+    "name": "刘璋",
+    "ruler": "liuzhang",
+    "color": "#228B22",
+    "cities": ["chengdu", "jiangzhou", "yongchang"],
+    "generals": ["liuzhang", "zhangren", "lengbao", "yanpu"],
+    "resources": {
+      "money": 30000,
+      "food": 60000,
+      "soldiers": 12000
+    },
+    "diplomacy": {},
+    "isPlayer": false
+  }
+]

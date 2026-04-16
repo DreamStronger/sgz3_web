@@ -1,0 +1,496 @@
+[
+  {
+    "id": "luoyang",
+    "name": "洛阳",
+    "state": "司隶",
+    "position": { "x": 1200, "y": 800 },
+    "terrain": "plain",
+    "stats": {
+      "population": 50000,
+      "development": 80,
+      "commerce": 90,
+      "defense": 70,
+      "morale": 60
+    },
+    "resources": {
+      "money": 10000,
+      "food": 20000,
+      "soldiers": 5000
+    },
+    "facilities": {
+      "market": 3,
+      "farm": 2,
+      "barracks": 2,
+      "wall": 3
+    },
+    "neighbors": ["changan", "xuchang", "ye"]
+  },
+  {
+    "id": "changan",
+    "name": "长安",
+    "state": "雍州",
+    "position": { "x": 300, "y": 500 },
+    "terrain": "plain",
+    "stats": {
+      "population": 45000,
+      "development": 75,
+      "commerce": 85,
+      "defense": 80,
+      "morale": 65
+    },
+    "resources": {
+      "money": 8000,
+      "food": 18000,
+      "soldiers": 4000
+    },
+    "facilities": {
+      "market": 2,
+      "farm": 3,
+      "barracks": 3,
+      "wall": 4
+    },
+    "neighbors": ["luoyang", "tianshui", "hanzhong"]
+  },
+  {
+    "id": "xuchang",
+    "name": "许昌",
+    "state": "豫州",
+    "position": { "x": 1500, "y": 1100 },
+    "terrain": "plain",
+    "stats": {
+      "population": 40000,
+      "development": 70,
+      "commerce": 80,
+      "defense": 60,
+      "morale": 55
+    },
+    "resources": {
+      "money": 7000,
+      "food": 15000,
+      "soldiers": 3000
+    },
+    "facilities": {
+      "market": 2,
+      "farm": 2,
+      "barracks": 2,
+      "wall": 2
+    },
+    "neighbors": ["luoyang", "ye", "runan"]
+  },
+  {
+    "id": "ye",
+    "name": "邺城",
+    "state": "冀州",
+    "position": { "x": 1600, "y": 300 },
+    "terrain": "plain",
+    "stats": {
+      "population": 42000,
+      "development": 72,
+      "commerce": 78,
+      "defense": 65,
+      "morale": 58
+    },
+    "resources": {
+      "money": 7500,
+      "food": 16000,
+      "soldiers": 3500
+    },
+    "facilities": {
+      "market": 2,
+      "farm": 3,
+      "barracks": 2,
+      "wall": 3
+    },
+    "neighbors": ["luoyang", "xuchang", "jinyang", "beiping"]
+  },
+  {
+    "id": "chengdu",
+    "name": "成都",
+    "state": "益州",
+    "position": { "x": 160, "y": 1240 },
+    "terrain": "plain",
+    "stats": {
+      "population": 48000,
+      "development": 78,
+      "commerce": 82,
+      "defense": 75,
+      "morale": 70
+    },
+    "resources": {
+      "money": 9000,
+      "food": 22000,
+      "soldiers": 4500
+    },
+    "facilities": {
+      "market": 3,
+      "farm": 3,
+      "barracks": 2,
+      "wall": 3
+    },
+    "neighbors": ["hanzhong", "jiangzhou", "yongchang"]
+  },
+  {
+    "id": "jianye",
+    "name": "建业",
+    "state": "扬州",
+    "position": { "x": 2200, "y": 1240 },
+    "terrain": "water",
+    "stats": {
+      "population": 52000,
+      "development": 82,
+      "commerce": 88,
+      "defense": 70,
+      "morale": 62
+    },
+    "resources": {
+      "money": 11000,
+      "food": 19000,
+      "soldiers": 5000
+    },
+    "facilities": {
+      "market": 3,
+      "farm": 2,
+      "barracks": 2,
+      "wall": 3
+    },
+    "neighbors": ["shouchun", "chaisang", "wu"]
+  },
+  {
+    "id": "xiangyang",
+    "name": "襄阳",
+    "state": "荆州",
+    "position": { "x": 960, "y": 1160 },
+    "terrain": "plain",
+    "stats": {
+      "population": 38000,
+      "development": 68,
+      "commerce": 75,
+      "defense": 65,
+      "morale": 60
+    },
+    "resources": {
+      "money": 6500,
+      "food": 14000,
+      "soldiers": 3000
+    },
+    "facilities": {
+      "market": 2,
+      "farm": 2,
+      "barracks": 2,
+      "wall": 2
+    },
+    "neighbors": ["xuchang", "runan", "jiangling", "chaisang"]
+  },
+  {
+    "id": "jiangling",
+    "name": "江陵",
+    "state": "荆州",
+    "position": { "x": 700, "y": 1300 },
+    "terrain": "water",
+    "stats": {
+      "population": 35000,
+      "development": 65,
+      "commerce": 72,
+      "defense": 60,
+      "morale": 58
+    },
+    "resources": {
+      "money": 6000,
+      "food": 13000,
+      "soldiers": 2500
+    },
+    "facilities": {
+      "market": 2,
+      "farm": 2,
+      "barracks": 1,
+      "wall": 2
+    },
+    "neighbors": ["xiangyang", "chaisang", "chengdu"]
+  },
+  {
+    "id": "runan",
+    "name": "汝南",
+    "state": "豫州",
+    "position": { "x": 1640, "y": 1200 },
+    "terrain": "plain",
+    "stats": {
+      "population": 32000,
+      "development": 62,
+      "commerce": 70,
+      "defense": 55,
+      "morale": 55
+    },
+    "resources": {
+      "money": 5500,
+      "food": 12000,
+      "soldiers": 2000
+    },
+    "facilities": {
+      "market": 1,
+      "farm": 2,
+      "barracks": 1,
+      "wall": 1
+    },
+    "neighbors": ["xuchang", "xiangyang", "shouchun"]
+  },
+  {
+    "id": "shouchun",
+    "name": "寿春",
+    "state": "扬州",
+    "position": { "x": 1900, "y": 1040 },
+    "terrain": "plain",
+    "stats": {
+      "population": 34000,
+      "development": 64,
+      "commerce": 71,
+      "defense": 58,
+      "morale": 56
+    },
+    "resources": {
+      "money": 5800,
+      "food": 12500,
+      "soldiers": 2200
+    },
+    "facilities": {
+      "market": 2,
+      "farm": 2,
+      "barracks": 1,
+      "wall": 2
+    },
+    "neighbors": ["runan", "jianye", "xiapi"]
+  },
+  {
+    "id": "hanzhong",
+    "name": "汉中",
+    "state": "益州",
+    "position": { "x": 300, "y": 960 },
+    "terrain": "mountain",
+    "stats": {
+      "population": 30000,
+      "development": 60,
+      "commerce": 65,
+      "defense": 75,
+      "morale": 65
+    },
+    "resources": {
+      "money": 5000,
+      "food": 11000,
+      "soldiers": 2500
+    },
+    "facilities": {
+      "market": 1,
+      "farm": 2,
+      "barracks": 2,
+      "wall": 3
+    },
+    "neighbors": ["changan", "chengdu", "tianshui"]
+  },
+  {
+    "id": "tianshui",
+    "name": "天水",
+    "state": "雍州",
+    "position": { "x": 100, "y": 300 },
+    "terrain": "mountain",
+    "stats": {
+      "population": 25000,
+      "development": 55,
+      "commerce": 60,
+      "defense": 70,
+      "morale": 62
+    },
+    "resources": {
+      "money": 4000,
+      "food": 9000,
+      "soldiers": 2000
+    },
+    "facilities": {
+      "market": 1,
+      "farm": 1,
+      "barracks": 2,
+      "wall": 2
+    },
+    "neighbors": ["changan", "hanzhong"]
+  },
+  {
+    "id": "jinyang",
+    "name": "晋阳",
+    "state": "并州",
+    "position": { "x": 1200, "y": 100 },
+    "terrain": "mountain",
+    "stats": {
+      "population": 28000,
+      "development": 58,
+      "commerce": 62,
+      "defense": 68,
+      "morale": 60
+    },
+    "resources": {
+      "money": 4500,
+      "food": 10000,
+      "soldiers": 2200
+    },
+    "facilities": {
+      "market": 1,
+      "farm": 2,
+      "barracks": 2,
+      "wall": 2
+    },
+    "neighbors": ["ye", "beiping"]
+  },
+  {
+    "id": "beiping",
+    "name": "北平",
+    "state": "幽州",
+    "position": { "x": 2000, "y": 100 },
+    "terrain": "plain",
+    "stats": {
+      "population": 26000,
+      "development": 56,
+      "commerce": 58,
+      "defense": 65,
+      "morale": 58
+    },
+    "resources": {
+      "money": 4200,
+      "food": 9500,
+      "soldiers": 2000
+    },
+    "facilities": {
+      "market": 1,
+      "farm": 1,
+      "barracks": 2,
+      "wall": 2
+    },
+    "neighbors": ["ye", "jinyang"]
+  },
+  {
+    "id": "chaisang",
+    "name": "柴桑",
+    "state": "扬州",
+    "position": { "x": 1760, "y": 1440 },
+    "terrain": "water",
+    "stats": {
+      "population": 29000,
+      "development": 59,
+      "commerce": 68,
+      "defense": 62,
+      "morale": 57
+    },
+    "resources": {
+      "money": 4800,
+      "food": 10500,
+      "soldiers": 2100
+    },
+    "facilities": {
+      "market": 1,
+      "farm": 1,
+      "barracks": 1,
+      "wall": 2
+    },
+    "neighbors": ["jiangling", "xiangyang", "jianye"]
+  },
+  {
+    "id": "wu",
+    "name": "吴郡",
+    "state": "扬州",
+    "position": { "x": 2300, "y": 1500 },
+    "terrain": "water",
+    "stats": {
+      "population": 31000,
+      "development": 63,
+      "commerce": 70,
+      "defense": 60,
+      "morale": 58
+    },
+    "resources": {
+      "money": 5200,
+      "food": 11500,
+      "soldiers": 2300
+    },
+    "facilities": {
+      "market": 2,
+      "farm": 1,
+      "barracks": 1,
+      "wall": 2
+    },
+    "neighbors": ["jianye"]
+  },
+  {
+    "id": "jiangzhou",
+    "name": "江州",
+    "state": "益州",
+    "position": { "x": 100, "y": 1500 },
+    "terrain": "mountain",
+    "stats": {
+      "population": 27000,
+      "development": 57,
+      "commerce": 61,
+      "defense": 66,
+      "morale": 61
+    },
+    "resources": {
+      "money": 4300,
+      "food": 9800,
+      "soldiers": 2100
+    },
+    "facilities": {
+      "market": 1,
+      "farm": 1,
+      "barracks": 1,
+      "wall": 2
+    },
+    "neighbors": ["chengdu", "yongchang"]
+  },
+  {
+    "id": "yongchang",
+    "name": "永昌",
+    "state": "益州",
+    "position": { "x": 50, "y": 1450 },
+    "terrain": "mountain",
+    "stats": {
+      "population": 22000,
+      "development": 50,
+      "commerce": 55,
+      "defense": 60,
+      "morale": 58
+    },
+    "resources": {
+      "money": 3500,
+      "food": 8000,
+      "soldiers": 1800
+    },
+    "facilities": {
+      "market": 1,
+      "farm": 1,
+      "barracks": 1,
+      "wall": 1
+    },
+    "neighbors": ["chengdu", "jiangzhou"]
+  },
+  {
+    "id": "xiapi",
+    "name": "下邳",
+    "state": "徐州",
+    "position": { "x": 2200, "y": 700 },
+    "terrain": "plain",
+    "stats": {
+      "population": 30000,
+      "development": 61,
+      "commerce": 66,
+      "defense": 58,
+      "morale": 56
+    },
+    "resources": {
+      "money": 5000,
+      "food": 11000,
+      "soldiers": 2000
+    },
+    "facilities": {
+      "market": 1,
+      "farm": 2,
+      "barracks": 1,
+      "wall": 2
+    },
+    "neighbors": ["shouchun", "beiping"]
+  }
+]
